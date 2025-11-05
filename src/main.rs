@@ -127,6 +127,7 @@ fn main() -> Result<()> {
         template_dir,
         output_dir,
         pipeline.logger.clone(),
+        &cli.base_url,
     )
     .context("Failed to create HTML generator")?;
 
@@ -155,6 +156,7 @@ fn main() -> Result<()> {
             mapper_thresholds,
             versification,
             crossrefs_sha256,
+            &cli.base_url,
         )
         .context("Failed to generate manifest and site")?;
 

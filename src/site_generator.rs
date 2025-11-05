@@ -21,6 +21,7 @@ impl SiteGenerator {
     pub fn generate_index(
         &self,
         versions: &HashMap<String, HashMap<String, Chapter>>,
+        base_url: &str,
     ) -> Result<PathBuf> {
         let output_path = self.output_base.join("index.html");
 
@@ -37,7 +38,18 @@ impl SiteGenerator {
         html.push_str("  <meta charset=\"UTF-8\">\n");
         html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         html.push_str("  <title>Bible Static Site - Available Versions</title>\n");
+        html.push_str("  <meta name=\"description\" content=\"Read the Bible online with multiple translations: KJV, ASV, and WEB. Browse by book, chapter, and verse.\">\n");
+        html.push_str(&format!("  <meta property=\"og:title\" content=\"Bible Static Site - Available Versions\">\n"));
+        html.push_str("  <meta property=\"og:description\" content=\"Read the Bible online with multiple translations: KJV, ASV, and WEB. Browse by book, chapter, and verse.\">\n");
+        html.push_str("  <meta property=\"og:type\" content=\"website\">\n");
+        html.push_str(&format!("  <meta property=\"og:url\" content=\"{}\">\n", base_url));
+        html.push_str(&format!("  <meta property=\"og:image\" content=\"{}static/og-image.png\">\n", base_url));
+        html.push_str("  <meta name=\"twitter:card\" content=\"summary_large_image\">\n");
+        html.push_str("  <meta name=\"twitter:title\" content=\"Bible Static Site - Available Versions\">\n");
+        html.push_str("  <meta name=\"twitter:description\" content=\"Read the Bible online with multiple translations: KJV, ASV, and WEB. Browse by book, chapter, and verse.\">\n");
+        html.push_str(&format!("  <meta name=\"twitter:image\" content=\"{}static/og-image.png\">\n", base_url));
         html.push_str("  <link rel=\"manifest\" href=\"/manifest.json\">\n");
+        html.push_str("  <link rel=\"icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\">\n");
         html.push_str("</head>\n");
         html.push_str("<body>\n");
         html.push_str("  <header>\n");

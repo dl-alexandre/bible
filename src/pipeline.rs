@@ -206,13 +206,14 @@ impl ProcessingPipeline {
         template_dir: &Path,
         output_dir: &Path,
         crossrefs: Option<&CrossReferenceMap>,
+        base_url: &str,
     ) -> Result<()> {
         self.logger.info(format!(
             "Generating HTML for {} chapters...",
             chapters.len()
         ));
 
-        let html_generator = HtmlGenerator::new(template_dir, output_dir, self.logger.clone())
+        let html_generator = HtmlGenerator::new(template_dir, output_dir, self.logger.clone(), base_url)
             .context("Failed to create HTML generator")?;
 
         let mut redirect_count = 0;
@@ -298,6 +299,7 @@ impl ProcessingPipeline {
         mapper_thresholds: Option<(f64, f64)>,
         versification: Option<HashMap<String, Vec<String>>>,
         crossrefs_sha256: Option<String>,
+        base_url: &str,
     ) -> Result<String> {
         self.logger.info("Generating manifest and site...".to_string());
 
@@ -331,7 +333,7 @@ impl ProcessingPipeline {
             .context("Failed to create site generator")?;
 
         site_generator
-            .generate_index(all_versions)
+            .generate_index(all_versions, base_url)
             .context("Failed to generate index")?;
 
         site_generator

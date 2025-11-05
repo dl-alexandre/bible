@@ -10,10 +10,11 @@ pub struct HtmlGenerator {
     tera: Tera,
     logger: DiagnosticLogger,
     output_base: PathBuf,
+    base_url: String,
 }
 
 impl HtmlGenerator {
-    pub fn new(template_dir: &Path, output_dir: &Path, logger: DiagnosticLogger) -> Result<Self> {
+    pub fn new(template_dir: &Path, output_dir: &Path, logger: DiagnosticLogger, base_url: &str) -> Result<Self> {
         let mut tera = Tera::new(
             template_dir
                 .join("*.html")
@@ -31,6 +32,7 @@ impl HtmlGenerator {
             tera,
             logger,
             output_base,
+            base_url: base_url.to_string(),
         })
     }
 
@@ -54,6 +56,7 @@ impl HtmlGenerator {
         context.insert("version_name", version_name);
         context.insert("last_updated", &chapter.metadata.last_updated.as_deref().unwrap_or("Unknown"));
         context.insert("manifest_tag", r#"<link rel="manifest" href="/manifest.json">"#);
+        context.insert("base_url", &self.base_url);
 
         let mut verses: Vec<VerseContext> = chapter
             .verses

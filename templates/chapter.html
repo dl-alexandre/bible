@@ -5,7 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ book }} {{ chapter }} - {{ version_name }}</title>
     <meta name="description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
+    
+    <meta property="og:title" content="{{ book }} {{ chapter }} - {{ version_name }}">
+    <meta property="og:description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ base_url }}bible/{{ version_code }}/{{ book }}/{{ chapter }}.html">
+    <meta property="og:image" content="{{ base_url }}static/og-image.png">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ book }} {{ chapter }} - {{ version_name }}">
+    <meta name="twitter:description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
+    <meta name="twitter:image" content="{{ base_url }}static/og-image.png">
+    
     <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
