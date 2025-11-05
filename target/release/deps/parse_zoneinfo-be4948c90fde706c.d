@@ -1,0 +1,11 @@
+/Users/developer/Bible/target/release/deps/parse_zoneinfo-be4948c90fde706c.d: /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/lib.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/line.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/structure.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/table.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/transitions.rs
+
+/Users/developer/Bible/target/release/deps/libparse_zoneinfo-be4948c90fde706c.rlib: /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/lib.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/line.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/structure.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/table.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/transitions.rs
+
+/Users/developer/Bible/target/release/deps/libparse_zoneinfo-be4948c90fde706c.rmeta: /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/lib.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/line.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/structure.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/table.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/transitions.rs
+
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/lib.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/line.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/structure.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/table.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parse-zoneinfo-0.3.1/src/transitions.rs:

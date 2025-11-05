@@ -1,0 +1,1 @@
+{"rustc":4996801173321332248,"features":"[]","declared_features":"[\"i128\"]","target":11268439169073813333,"profile":2040997289075261528,"path":5069803950420739966,"deps":[],"local":[{"CheckDepInfo":{"dep_info":"release/.fingerprint/num-cmp-53471a40350a8f41/dep-lib-num_cmp","checksum":false}}],"rustflags":[],"config":2069994364910194474,"compile_kind":0}

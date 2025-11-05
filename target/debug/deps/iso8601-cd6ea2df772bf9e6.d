@@ -1,0 +1,11 @@
+/Users/developer/Bible/.kiro/specs/bible-static-generator/target/debug/deps/iso8601-cd6ea2df772bf9e6.d: /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/lib.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/display.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/parsers.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/date.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/time.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/datetime.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/duration.rs
+
+/Users/developer/Bible/.kiro/specs/bible-static-generator/target/debug/deps/libiso8601-cd6ea2df772bf9e6.rmeta: /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/lib.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/display.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/parsers.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/date.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/time.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/datetime.rs /Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/duration.rs
+
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/lib.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/display.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/parsers.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/date.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/time.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/datetime.rs:
+/Users/developer/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/iso8601-0.6.3/src/duration.rs:
