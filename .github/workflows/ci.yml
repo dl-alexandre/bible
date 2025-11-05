@@ -72,6 +72,9 @@ jobs:
           if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; fi
           python3 scripts/create_favicon.py || echo "Warning: Could not generate favicon"
           cargo run --release -- \
+            --datasets datasets/kjv.txt \
+            --datasets datasets/asv.txt \
+            --datasets datasets/web.txt \
             --out out \
             --minify-json \
             --gzip-json \
