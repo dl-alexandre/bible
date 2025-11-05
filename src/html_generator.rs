@@ -178,6 +178,127 @@ impl HtmlGenerator {
 
         Ok(redirects)
     }
+
+    pub fn generate_version_index(
+        &self,
+        version_code: &str,
+        version_name: &str,
+        books: &[String],
+    ) -> Result<PathBuf> {
+        let version_dir = self.output_base.join("bible").join(version_code);
+        fs::create_dir_all(&version_dir)
+            .context("Failed to create version directory")?;
+
+        let output_path = version_dir.join("index.html");
+
+        let mut html = String::new();
+        html.push_str("<!DOCTYPE html>\n");
+        html.push_str("<html lang=\"en\">\n");
+        html.push_str("<head>\n");
+        html.push_str("  <meta charset=\"UTF-8\">\n");
+        html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+        html.push_str(&format!("  <title>{} - Bible Versions</title>\n", version_name));
+        html.push_str(&format!("  <meta name=\"description\" content=\"Browse all books in the {} translation of the Bible.\">\n", version_name));
+        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"/static/styles.css\">\n"));
+        html.push_str("</head>\n");
+        html.push_str("<body>\n");
+        html.push_str("  <nav aria-label=\"Breadcrumb navigation\">\n");
+        html.push_str("    <ol class=\"breadcrumb\">\n");
+        html.push_str("      <li><a href=\"/\">Home</a></li>\n");
+        html.push_str(&format!("      <li aria-current=\"page\">{}</li>\n", version_name));
+        html.push_str("    </ol>\n");
+        html.push_str("  </nav>\n");
+        html.push_str("  <header>\n");
+        html.push_str(&format!("    <h1>{}</h1>\n", version_name));
+        html.push_str("  </header>\n");
+        html.push_str("  <main>\n");
+        html.push_str("    <section>\n");
+        html.push_str("      <h2>Books</h2>\n");
+        html.push_str("      <ul>\n");
+
+        for book in books {
+            let book_url = format!("/bible/{}/{}/", version_code, book);
+            html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
+        }
+
+        html.push_str("      </ul>\n");
+        html.push_str("    </section>\n");
+        html.push_str("  </main>\n");
+        html.push_str("</body>\n");
+        html.push_str("</html>\n");
+
+        fs::write(&output_path, html)
+            .context("Failed to write version index file")?;
+
+        self.logger.info(format!(
+            "Generated version index: {}",
+            output_path.display()
+        ));
+
+        Ok(output_path)
+    }
+
+    pub fn generate_book_index(
+        &self,
+        version_code: &str,
+        version_name: &str,
+        book: &str,
+        chapters: &[u32],
+    ) -> Result<PathBuf> {
+        let book_dir = self.output_base.join("bible").join(version_code).join(book);
+        fs::create_dir_all(&book_dir)
+            .context("Failed to create book directory")?;
+
+        let output_path = book_dir.join("index.html");
+
+        let mut html = String::new();
+        html.push_str("<!DOCTYPE html>\n");
+        html.push_str("<html lang=\"en\">\n");
+        html.push_str("<head>\n");
+        html.push_str("  <meta charset=\"UTF-8\">\n");
+        html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
+        html.push_str(&format!("  <title>{} - {} - Bible</title>\n", book, version_name));
+        html.push_str(&format!("  <meta name=\"description\" content=\"Browse all chapters in {} ({}) translation.\">\n", book, version_name));
+        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"/static/styles.css\">\n"));
+        html.push_str("</head>\n");
+        html.push_str("<body>\n");
+        html.push_str("  <nav aria-label=\"Breadcrumb navigation\">\n");
+        html.push_str("    <ol class=\"breadcrumb\">\n");
+        html.push_str("      <li><a href=\"/\">Home</a></li>\n");
+        html.push_str(&format!("      <li><a href=\"/bible/{}/\">{}</a></li>\n", version_code, version_name));
+        html.push_str(&format!("      <li aria-current=\"page\">{}</li>\n", book));
+        html.push_str("    </ol>\n");
+        html.push_str("  </nav>\n");
+        html.push_str("  <header>\n");
+        html.push_str(&format!("    <h1>{}</h1>\n", book));
+        html.push_str(&format!("    <p class=\"version-info\">Version: <strong>{}</strong></p>\n", version_name));
+        html.push_str("  </header>\n");
+        html.push_str("  <main>\n");
+        html.push_str("    <section>\n");
+        html.push_str("      <h2>Chapters</h2>\n");
+        html.push_str("      <ul>\n");
+
+        for chapter in chapters {
+            let chapter_url = format!("/bible/{}/{}/{}.html", version_code, book, chapter);
+            html.push_str(&format!("        <li><a href=\"{}\">Chapter {}</a></li>\n", chapter_url, chapter));
+        }
+
+        html.push_str("      </ul>\n");
+        html.push_str("    </section>\n");
+        html.push_str("  </main>\n");
+        html.push_str("</body>\n");
+        html.push_str("</html>\n");
+
+        fs::write(&output_path, html)
+            .context("Failed to write book index file")?;
+
+        self.logger.info(format!(
+            "Generated book index: {}",
+            output_path.display()
+        ));
+
+        Ok(output_path)
+    }
 }
 
 #[derive(serde::Serialize)]

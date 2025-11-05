@@ -217,6 +217,8 @@ impl ProcessingPipeline {
             .context("Failed to create HTML generator")?;
 
         let mut redirect_count = 0;
+        let mut books_map: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
+
         for (chapter_key, chapter) in chapters {
             let chapter_path = html_generator
                 .generate_chapter_html(chapter, version_code, version_name, crossrefs)
@@ -227,12 +229,33 @@ impl ProcessingPipeline {
                 .with_context(|| format!("Failed to generate redirects for {}", chapter_key))?;
 
             redirect_count += redirects.len();
+
+            books_map
+                .entry(chapter.book.clone())
+                .or_insert_with(Vec::new)
+                .push(chapter.chapter);
         }
 
+        let mut books: Vec<String> = books_map.keys().cloned().collect();
+        books.sort();
+
+        for (book, chapters) in &books_map {
+            let mut sorted_chapters = chapters.clone();
+            sorted_chapters.sort();
+            html_generator
+                .generate_book_index(version_code, version_name, book, &sorted_chapters)
+                .with_context(|| format!("Failed to generate book index for {}", book))?;
+        }
+
+        html_generator
+            .generate_version_index(version_code, version_name, &books)
+            .context("Failed to generate version index")?;
+
         self.logger.info(format!(
-            "Generated {} HTML files and {} redirects",
+            "Generated {} HTML files, {} redirects, {} book indices, and 1 version index",
             chapters.len(),
-            redirect_count
+            redirect_count,
+            books_map.len()
         ));
 
         Ok(())
