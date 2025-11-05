@@ -66,7 +66,11 @@ jobs:
       
       - name: Generate site
         run: |
-          mkdir -p out
+          mkdir -p out/static
+          if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; fi
+          if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; fi
+          if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; fi
+          python3 scripts/create_favicon.py || echo "Warning: Could not generate favicon"
           cargo run --release -- \
             --out out \
             --minify-json \
@@ -75,6 +79,7 @@ jobs:
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
             --base-url "https://dl-alexandre.github.io/${{ github.event.repository.name }}/" || true
+          rm -rf out/kjv out/asv out/web
       
       - name: Validate output
         run: |
