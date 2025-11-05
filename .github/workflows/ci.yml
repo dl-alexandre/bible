@@ -53,6 +53,10 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       
@@ -97,7 +101,7 @@ jobs:
             --utc-timestamp \
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
-            --base-url "https://dl-alexandre.github.io/bible/" || {
+            --base-url "https://dl-alexandre.github.io/Bible/" || {
             echo "Build failed!"
             exit 1
           }
@@ -140,18 +144,16 @@ jobs:
           ls -la out/ | head -15
           echo "HTML files: $(find out -name '*.html' | wc -l)"
       
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        permissions:
-          contents: write
-          pages: write
-          id-token: write
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          force_orphan: true
-          enable_jekyll: false
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          path: ./out
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
