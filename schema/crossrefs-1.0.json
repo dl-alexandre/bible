@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CrossReferenceMap",
+  "type": "object",
+  "required": [
+    "conflicts",
+    "mappings",
+    "schema_version"
+  ],
+  "properties": {
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EnhancedMappingConflict"
+      }
+    },
+    "mappings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/definitions/MappingEntry"
+        }
+      }
+    },
+    "metrics": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/MappingMetrics"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "type": "string"
+    },
+    "versification": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ConflictType": {
+      "type": "string",
+      "enum": [
+        "split",
+        "merge",
+        "shift",
+        "absent"
+      ]
+    },
+    "EnhancedMappingConflict": {
+      "type": "object",
+      "required": [
+        "canonical",
+        "details",
+        "type",
+        "version"
+      ],
+      "properties": {
+        "canonical": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "$ref": "#/definitions/ConflictType"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "MappingEntry": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "ref"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "reason"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string"
+            },
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "MappingMetrics": {
+      "type": "object",
+      "required": [
+        "conflicts",
+        "coverage",
+        "mapped",
+        "nulls",
+        "similarity_thresholds",
+        "total"
+      ],
+      "properties": {
+        "conflicts": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "coverage": {
+          "type": "number",
+          "format": "double"
+        },
+        "mapped": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "nulls": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "similarity_thresholds": {
+          "$ref": "#/definitions/SimilarityThresholds"
+        },
+        "total": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        }
+      }
+    },
+    "SimilarityThresholds": {
+      "type": "object",
+      "required": [
+        "jaccard",
+        "levenshtein"
+      ],
+      "properties": {
+        "jaccard": {
+          "type": "number",
+          "format": "double"
+        },
+        "levenshtein": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}

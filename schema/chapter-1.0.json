@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChapterJson",
+  "description": "JSON output structures Chapter JSON output",
+  "type": "object",
+  "required": [
+    "book",
+    "chapter",
+    "extensions",
+    "metadata",
+    "schema_version",
+    "verses",
+    "version"
+  ],
+  "properties": {
+    "book": {
+      "type": "string"
+    },
+    "chapter": {
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0.0
+    },
+    "extensions": true,
+    "metadata": {
+      "$ref": "#/definitions/ChapterMetadata"
+    },
+    "schema_version": {
+      "type": "string"
+    },
+    "verses": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "ChapterMetadata": {
+      "type": "object",
+      "required": [
+        "verse_count"
+      ],
+      "properties": {
+        "last_updated": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verse_count": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        }
+      }
+    }
+  }
+}

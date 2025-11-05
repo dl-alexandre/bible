@@ -1,0 +1,5 @@
+/target
+/out
+/logs
+*.log
+.DS_Store

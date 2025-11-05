@@ -1,0 +1,32 @@
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Processing version: kjv","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Processed 1 books, 1 chapters, 31 verses for kjv","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generating cross-version mappings...","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Mapping summary: 31 total, 31 mapped, 0 nulls, 0 conflicts (100.00% coverage)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Similarity thresholds: Jaccard=0.70, Levenshtein=0.15","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated HTML: out/bible/kjv/Genesis/1.html","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generating JSON API...","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Compressed 4460 -> 1378 (69.1% reduction)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated JSON: out/kjv/Genesis/1.json (4460 bytes)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Compressed 98 -> 102 (-4.1% reduction)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated versions.json (98 bytes)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Compressed 71 -> 94 (-32.4% reduction)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated books.json (71 bytes)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Compressed 1593 -> 336 (78.9% reduction)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated crossrefs.json (1593 bytes, SHA-256: 330b0e78b762877589c1367498366e2c084344e153d6d0b39c6bb6d3b7cece83)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated JSON API: 1 chapters, metadata files, with compression","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generating manifest and site...","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated manifest.json (631 bytes, SHA-256: e8ea7a52e3c2119880013ee32987cb973434e15371026be80c9ae140114f1013)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated index.html (774 bytes)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated manifest (SHA-256: e8ea7a52e3c2119880013ee32987cb973434e15371026be80c9ae140114f1013) and site index","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated sitemap.xml (497 bytes)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Generated robots.txt","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Validating all JSON files against schemas...","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"warning","message":"Schema manifest-1.0.json not found, skipping validation","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"warning","message":"Schema versions.json not found, skipping validation","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"warning","message":"Schema books.json not found, skipping validation","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"warning","message":"Schema crossrefs-1.0.json not found, skipping validation","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"All JSON files validated successfully","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"info","message":"Checking output budgets...","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"error","message":"Gzip ratio too low: out/versions.json (-0.04081632653061229 < 0.7 minimum)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"error","message":"Gzip ratio too low: out/books.json (-0.323943661971831 < 0.7 minimum)","context":null}
+{"timestamp":"2025-11-04T14:59:14Z","level":"error","message":"Gzip ratio too low: out/kjv/Genesis/1.json (0.6910313901345291 < 0.7 minimum)","context":null}

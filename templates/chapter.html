@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book }} {{ chapter }} - {{ version_name }}</title>
+    <meta name="description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav aria-label="Breadcrumb navigation">
+        <ol class="breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li><a href="/bible/{{ version_code }}">{{ version_name }}</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}">{{ book }}</a></li>
+            <li aria-current="page">{{ book }} {{ chapter }}</li>
+        </ol>
+    </nav>
+
+    <header>
+        <h1>{{ book }} {{ chapter }}</h1>
+        <p class="version-info">Version: <strong>{{ version_name }}</strong></p>
+    </header>
+
+    <nav aria-label="Chapter navigation">
+        <ul class="chapter-nav">
+            {% if prev_chapter %}
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}" rel="prev" aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
+            {% endif %}
+            <li><a href="/bible/{{ version_code }}/{{ book }}" aria-label="All chapters in {{ book }}">Chapters</a></li>
+            {% if next_chapter %}
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}" rel="next" aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <main>
+        <article class="chapter-content">
+            <div class="verses">
+                {% for verse in verses %}
+                <p id="v{{ verse.number }}" class="verse" data-verse="{{ verse.canonical_ref }}" data-anchor="{{ verse.anchor }}">
+                    <a href="#v{{ verse.number }}" class="verse-number" aria-label="Verse {{ verse.number }}" title="Link to verse {{ verse.number }}">{{ verse.number }}</a>
+                    <span class="verse-text">{{ verse.text }}</span>
+                </p>
+                {% endfor %}
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>Last updated: {{ last_updated }}</p>
+    </footer>
+
+    <script src="/static/compare.js"></script>
+</body>
+</html>
+

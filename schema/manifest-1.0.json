@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GlobalManifest",
+  "description": "Global manifest",
+  "type": "object",
+  "required": [
+    "api_endpoints",
+    "available_versions",
+    "build_timestamp",
+    "extensions",
+    "schema_locations",
+    "schema_version",
+    "source_checksums"
+  ],
+  "properties": {
+    "api_endpoints": {
+      "$ref": "#/definitions/ApiEndpoints"
+    },
+    "available_versions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "build_timestamp": {
+      "type": "string"
+    },
+    "crossrefs_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extensions": true,
+    "mapper_thresholds": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/MapperThresholds"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_locations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "schema_version": {
+      "type": "string"
+    },
+    "source_checksums": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "versification": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ApiEndpoints": {
+      "type": "object",
+      "required": [
+        "books",
+        "chapters",
+        "crossrefs",
+        "versions"
+      ],
+      "properties": {
+        "books": {
+          "type": "string"
+        },
+        "chapters": {
+          "type": "string"
+        },
+        "crossrefs": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "string"
+        }
+      }
+    },
+    "MapperThresholds": {
+      "type": "object",
+      "required": [
+        "jaccard",
+        "levenshtein"
+      ],
+      "properties": {
+        "jaccard": {
+          "type": "number",
+          "format": "double"
+        },
+        "levenshtein": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}
