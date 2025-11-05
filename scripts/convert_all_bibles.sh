@@ -2,8 +2,12 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
 DATASETS_DIR="datasets"
-CONVERTER="convert_to_kjv_format.py"
+CONVERTER="scripts/convert_to_kjv_format.py"
 
 echo "Converting all downloaded Bible sources to kjv.txt format..."
 echo ""
