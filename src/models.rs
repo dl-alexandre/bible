@@ -273,6 +273,9 @@ mod tests {
             schema_locations: std::collections::HashMap::from([
                 ("chapter".to_string(), "/schema/chapter-1.0.json".to_string()),
             ]),
+            mapper_thresholds: None,
+            versification: None,
+            crossrefs_sha256: None,
             extensions: serde_json::Value::Null,
         };
 

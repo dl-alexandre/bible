@@ -19,12 +19,12 @@
 
 ### Quick Build
 ```bash
-./build.sh
+./scripts/build.sh
 ```
 
 ### Custom Base URL
 ```bash
-BASE_URL="https://your-custom-url.com" ./build.sh
+BASE_URL="https://your-custom-url.com" ./scripts/build.sh
 ```
 
 ### Manual Build

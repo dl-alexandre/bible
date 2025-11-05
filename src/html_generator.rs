@@ -216,7 +216,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
@@ -251,7 +251,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
@@ -284,7 +284,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
@@ -315,7 +315,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         
         let redirect_path = generator
             .generate_redirect("Genesis", 1, "1", "kjv", "KJV", temp_dir.path())
@@ -352,7 +352,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
@@ -381,7 +381,7 @@ mod tests {
         let log_dir = temp_dir.path().join("logs");
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
-        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger).unwrap();
+        let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
         let chapter = create_genesis_1_kjv();
         
         let chapter_path = generator

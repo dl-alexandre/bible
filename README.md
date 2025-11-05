@@ -18,13 +18,13 @@ A deterministic static site generator for Bible datasets, producing HTML and JSO
 The easiest way to build the site:
 
 ```bash
-./build.sh
+./scripts/build.sh
 ```
 
 Or with custom base URL:
 
 ```bash
-BASE_URL="https://dl-alexandre.github.io/Bible/" ./build.sh
+BASE_URL="https://dl-alexandre.github.io/Bible/" ./scripts/build.sh
 ```
 
 ### Manual Build

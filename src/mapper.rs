@@ -1179,7 +1179,7 @@ mod tests {
         
         for jaccard_threshold in thresholds {
             let config = MapperConfig::new(jaccard_threshold, 0.15);
-            let mut mapper = CrossVersionMapper::with_config(config).unwrap();
+            let mut mapper = CrossVersionMapper::with_config(&config).unwrap();
             
             let mappings = mapper.generate_mappings_with_fallback(&versions).unwrap();
             let metrics = mappings.metrics.as_ref().unwrap();
