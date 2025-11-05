@@ -81,7 +81,7 @@ jobs:
             --utc-timestamp \
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
-            --base-url "https://dl-alexandre.github.io/${{ github.event.repository.name }}/" || true
+            --base-url "https://dl-alexandre.github.io/${{ github.event.repository.name }}/"
           rm -rf out/kjv out/asv out/web
       
       - name: Validate output
