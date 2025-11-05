@@ -101,7 +101,7 @@ jobs:
             --utc-timestamp \
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
-            --base-url "https://dl-alexandre.github.io/Bible/" || {
+            --base-url "https://dl-alexandre.github.io/bible/" || {
             echo "Build failed!"
             exit 1
           }

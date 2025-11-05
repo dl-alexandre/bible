@@ -35,7 +35,7 @@ cargo build --release
   --datasets datasets/asv.txt \
   --datasets datasets/web.txt \
   --out out \
-  --base-url "https://dl-alexandre.github.io/Bible/" \
+  --base-url "https://dl-alexandre.github.io/bible/" \
   --minify-json \
   --gzip-json \
   --utc-timestamp \
@@ -50,7 +50,7 @@ cargo build --release
 - `--out`: Output directory
 
 ### Recommended Options
-- `--base-url`: Your GitHub Pages URL (e.g., `https://dl-alexandre.github.io/Bible/`)
+- `--base-url`: Your GitHub Pages URL (e.g., `https://dl-alexandre.github.io/bible/`)
 - `--minify-json`: Minify JSON output files
 - `--gzip-json`: Compress JSON files
 - `--utc-timestamp`: Use normalized UTC timestamps

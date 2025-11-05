@@ -3,7 +3,7 @@
 set -e
 
 OUT_DIR="${OUT_DIR:-out}"
-BASE_URL="${BASE_URL:-https://dl-alexandre.github.io/Bible/}"
+BASE_URL="${BASE_URL:-https://dl-alexandre.github.io/bible/}"
 
 echo "Building Bible Static Site..."
 echo "Output directory: $OUT_DIR"

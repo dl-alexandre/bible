@@ -24,7 +24,7 @@ The easiest way to build the site:
 Or with custom base URL:
 
 ```bash
-BASE_URL="https://dl-alexandre.github.io/Bible/" ./scripts/build.sh
+BASE_URL="https://dl-alexandre.github.io/bible/" ./scripts/build.sh
 ```
 
 ### Manual Build
@@ -36,7 +36,7 @@ cargo build --release
   --datasets datasets/asv.txt \
   --datasets datasets/web.txt \
   --out out \
-  --base-url "https://dl-alexandre.github.io/Bible/" \
+  --base-url "https://dl-alexandre.github.io/bible/" \
   --minify-json \
   --gzip-json \
   --utc-timestamp \
