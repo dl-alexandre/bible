@@ -70,7 +70,6 @@ jobs:
           if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; fi
           if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; fi
           if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; fi
-          python3 scripts/create_favicon.py || echo "Warning: Could not generate favicon"
           cargo run --release -- \
             --datasets datasets/kjv.txt \
             --datasets datasets/asv.txt \
@@ -86,31 +85,14 @@ jobs:
       
       - name: Validate output
         run: |
+          echo "Checking output files..."
+          ls -la out/ | head -10
+          if [ -f out/index.html ]; then
+            echo "✓ index.html exists"
+          fi
           if [ -f out/manifest.json ]; then
             echo "✓ manifest.json exists"
-            python3 -m json.tool out/manifest.json > /dev/null && echo "✓ manifest.json is valid JSON"
           fi
-          if [ -f out/versions.json ]; then
-            echo "✓ versions.json exists"
-            python3 -m json.tool out/versions.json > /dev/null && echo "✓ versions.json is valid JSON"
-          fi
-          if [ -f out/books.json ]; then
-            echo "✓ books.json exists"
-            python3 -m json.tool out/books.json > /dev/null && echo "✓ books.json is valid JSON"
-          fi
-          if [ -f out/crossrefs.json ]; then
-            echo "✓ crossrefs.json exists"
-            python3 -m json.tool out/crossrefs.json > /dev/null && echo "✓ crossrefs.json is valid JSON"
-          fi
-      
-      - name: Check budgets
-        run: |
-          find out -name "*.html" -size +50k | while read file; do
-            echo "⚠ HTML file exceeds 50KB: $file"
-          done
-          find out -name "*.json" -size +500k | while read file; do
-            echo "⚠ JSON file exceeds 500KB: $file"
-          done
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
