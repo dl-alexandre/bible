@@ -66,14 +66,13 @@ jobs:
       
       - name: Generate site
         run: |
-          set -e
           echo "Checking datasets..."
-          ls -la datasets/
+          ls -la datasets/ || echo "Warning: datasets directory issue"
           echo "Copying static assets..."
           mkdir -p out/static
-          if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; fi
-          if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; fi
-          if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; fi
+          if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; echo "✓ Copied og-image.png"; fi
+          if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; echo "✓ Copied favicon.ico"; fi
+          if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; echo "✓ Copied styles.css"; fi
           echo "Building site..."
           cargo run --release -- \
             --datasets datasets/kjv.txt \
@@ -85,11 +84,21 @@ jobs:
             --utc-timestamp \
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
-            --base-url "https://dl-alexandre.github.io/bible/"
+            --base-url "https://dl-alexandre.github.io/bible/" || {
+            echo "Build failed!"
+            exit 1
+          }
           echo "Removing JSON directories..."
           rm -rf out/kjv out/asv out/web || true
           echo "Build complete! Files in out/:"
           ls -la out/ | head -20
+          echo "Checking for index.html..."
+          if [ -f out/index.html ]; then
+            echo "✓ index.html exists"
+          else
+            echo "✗ index.html missing!"
+            exit 1
+          fi
       
       - name: Validate output
         run: |
