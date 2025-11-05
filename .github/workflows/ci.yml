@@ -66,10 +66,15 @@ jobs:
       
       - name: Generate site
         run: |
+          set -e
+          echo "Checking datasets..."
+          ls -la datasets/
+          echo "Copying static assets..."
           mkdir -p out/static
           if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; fi
           if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; fi
           if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; fi
+          echo "Building site..."
           cargo run --release -- \
             --datasets datasets/kjv.txt \
             --datasets datasets/asv.txt \
@@ -81,7 +86,10 @@ jobs:
             --threshold-jaccard 0.70 \
             --threshold-lev 0.15 \
             --base-url "https://dl-alexandre.github.io/bible/"
-          rm -rf out/kjv out/asv out/web
+          echo "Removing JSON directories..."
+          rm -rf out/kjv out/asv out/web || true
+          echo "Build complete! Files in out/:"
+          ls -la out/ | head -20
       
       - name: Validate output
         run: |
@@ -97,6 +105,8 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        permissions:
+          contents: write
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
