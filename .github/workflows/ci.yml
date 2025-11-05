@@ -124,13 +124,32 @@ jobs:
             echo "✓ manifest.json exists"
           fi
       
+      - name: Verify output before deploy
+        run: |
+          echo "Verifying output directory..."
+          if [ ! -d "out" ]; then
+            echo "ERROR: out directory does not exist!"
+            exit 1
+          fi
+          if [ ! -f "out/index.html" ]; then
+            echo "ERROR: index.html does not exist!"
+            exit 1
+          fi
+          echo "✓ Output verified"
+          echo "Files in out/:"
+          ls -la out/ | head -15
+          echo "HTML files: $(find out -name '*.html' | wc -l)"
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         permissions:
           contents: write
+          pages: write
+          id-token: write
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./out
           force_orphan: true
+          enable_jekyll: false
 
