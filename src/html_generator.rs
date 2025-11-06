@@ -264,7 +264,7 @@ impl HtmlGenerator {
         html.push_str("<body>\n");
         html.push_str("  <nav aria-label=\"Breadcrumb navigation\">\n");
         html.push_str("    <ol class=\"breadcrumb\">\n");
-        html.push_str("      <li><a href=\"/\">Home</a></li>\n");
+        html.push_str("      <li><a href=\"/bible/\">Home</a></li>\n");
         html.push_str(&format!("      <li><a href=\"/bible/{}/\">{}</a></li>\n", version_code, version_name));
         html.push_str(&format!("      <li aria-current=\"page\">{}</li>\n", book));
         html.push_str("    </ol>\n");
