@@ -107,10 +107,26 @@ jobs:
           }
           echo "Removing JSON directories..."
           rm -rf out/kjv out/asv out/web || true
-          echo "Build complete! Files in out/:"
-          ls -la out/ | head -20
-          echo "Checking for index.html..."
+          echo "Moving files to correct structure for GitHub Pages..."
           if [ -f out/index.html ]; then
+            mv out/index.html out/bible/index.html || true
+          fi
+          if [ -f out/manifest.json ]; then
+            mv out/manifest.json out/bible/manifest.json || true
+          fi
+          if [ -f out/sitemap.xml ]; then
+            mv out/sitemap.xml out/bible/sitemap.xml || true
+          fi
+          if [ -f out/robots.txt ]; then
+            mv out/robots.txt out/bible/robots.txt || true
+          fi
+          if [ -d out/static ]; then
+            mv out/static out/bible/static || true
+          fi
+          echo "Build complete! Files in out/bible/:"
+          ls -la out/bible/ | head -20
+          echo "Checking for index.html..."
+          if [ -f out/bible/index.html ]; then
             echo "✓ index.html exists"
           else
             echo "✗ index.html missing!"
@@ -120,29 +136,29 @@ jobs:
       - name: Validate output
         run: |
           echo "Checking output files..."
-          ls -la out/ | head -10
-          if [ -f out/index.html ]; then
+          ls -la out/bible/ | head -10
+          if [ -f out/bible/index.html ]; then
             echo "✓ index.html exists"
           fi
-          if [ -f out/manifest.json ]; then
+          if [ -f out/bible/manifest.json ]; then
             echo "✓ manifest.json exists"
           fi
       
       - name: Verify output before deploy
         run: |
           echo "Verifying output directory..."
-          if [ ! -d "out" ]; then
-            echo "ERROR: out directory does not exist!"
+          if [ ! -d "out/bible" ]; then
+            echo "ERROR: out/bible directory does not exist!"
             exit 1
           fi
-          if [ ! -f "out/index.html" ]; then
+          if [ ! -f "out/bible/index.html" ]; then
             echo "ERROR: index.html does not exist!"
             exit 1
           fi
           echo "✓ Output verified"
-          echo "Files in out/:"
-          ls -la out/ | head -15
-          echo "HTML files: $(find out -name '*.html' | wc -l)"
+          echo "Files in out/bible/:"
+          ls -la out/bible/ | head -15
+          echo "HTML files: $(find out/bible -name '*.html' | wc -l)"
           echo "Checking version index files..."
           if [ -f "out/bible/asv/index.html" ]; then
             echo "✓ ASV index.html exists"
@@ -199,14 +215,14 @@ jobs:
           echo "Verifying files that will be uploaded..."
           echo "Checking for index files in artifact:"
           find out/bible -name "index.html" -type f | head -10
-          echo "Total HTML files: $(find out -name '*.html' -type f | wc -l)"
+          echo "Total HTML files: $(find out/bible -name '*.html' -type f | wc -l)"
           echo "Checking out/bible/kjv/ structure:"
           ls -la out/bible/kjv/ | head -10
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./out/bible
       
       - name: Deploy to GitHub Pages
         id: deployment
