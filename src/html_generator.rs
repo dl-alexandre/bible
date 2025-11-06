@@ -461,10 +461,10 @@ mod tests {
             r#"<html><body>
             <nav aria-label="Chapter navigation">
             {% if prev_chapter %}
-            <a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}" rel="prev">← {{ prev_chapter }}</a>
+            <a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}.html" rel="prev">← {{ prev_chapter }}</a>
             {% endif %}
             {% if next_chapter %}
-            <a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}" rel="next">{{ next_chapter }} →</a>
+            <a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}.html" rel="next">{{ next_chapter }} →</a>
             {% endif %}
             </nav>
             </body></html>"#,

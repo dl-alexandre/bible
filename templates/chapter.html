@@ -25,8 +25,8 @@
     <nav aria-label="Breadcrumb navigation">
         <ol class="breadcrumb">
             <li><a href="/">Home</a></li>
-            <li><a href="/bible/{{ version_code }}">{{ version_name }}</a></li>
-            <li><a href="/bible/{{ version_code }}/{{ book }}">{{ book }}</a></li>
+            <li><a href="/bible/{{ version_code }}/">{{ version_name }}</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/">{{ book }}</a></li>
             <li aria-current="page">{{ book }} {{ chapter }}</li>
         </ol>
     </nav>
@@ -39,11 +39,11 @@
     <nav aria-label="Chapter navigation">
         <ul class="chapter-nav">
             {% if prev_chapter %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}" rel="prev" aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}.html" rel="prev" aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
             {% endif %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}" aria-label="All chapters in {{ book }}">Chapters</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/" aria-label="All chapters in {{ book }}">Chapters</a></li>
             {% if next_chapter %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}" rel="next" aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}.html" rel="next" aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
             {% endif %}
         </ul>
     </nav>
