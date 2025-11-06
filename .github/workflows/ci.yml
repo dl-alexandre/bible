@@ -143,6 +143,22 @@ jobs:
           echo "Files in out/:"
           ls -la out/ | head -15
           echo "HTML files: $(find out -name '*.html' | wc -l)"
+          echo "Checking version index files..."
+          if [ -f "out/bible/asv/index.html" ]; then
+            echo "✓ ASV index.html exists"
+          else
+            echo "✗ ASV index.html missing!"
+          fi
+          if [ -f "out/bible/kjv/index.html" ]; then
+            echo "✓ KJV index.html exists"
+          else
+            echo "✗ KJV index.html missing!"
+          fi
+          if [ -f "out/bible/web/index.html" ]; then
+            echo "✓ WEB index.html exists"
+          else
+            echo "✗ WEB index.html missing!"
+          fi
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
