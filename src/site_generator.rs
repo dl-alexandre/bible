@@ -57,7 +57,7 @@ impl SiteGenerator {
         html.push_str("  </header>\n");
         html.push_str("  <nav aria-label=\"Breadcrumb\">\n");
         html.push_str("    <ol>\n");
-        html.push_str("      <li><a href=\"/\">Home</a></li>\n");
+        html.push_str("      <li><a href=\"/bible/\">Home</a></li>\n");
         html.push_str("    </ol>\n");
         html.push_str("  </nav>\n");
         html.push_str("  <main>\n");
@@ -68,7 +68,7 @@ impl SiteGenerator {
         for (version_code, chapter_count) in version_list {
             let version_name = version_code.to_uppercase();
             html.push_str(&format!(
-                "        <li><a href=\"/bible/{}\">{}</a> ({} chapters)</li>\n",
+                "        <li><a href=\"/bible/{}/\">{}</a> ({} chapters)</li>\n",
                 version_code, version_name, chapter_count
             ));
         }
