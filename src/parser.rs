@@ -119,6 +119,13 @@ impl TextParser {
                 if let Some(ref mut chapter) = current_chapter {
                     chapter.verses.push(verse_data);
                 }
+            } else if let Some(ref mut chapter) = current_chapter {
+                if let Some(last_verse) = chapter.verses.last_mut() {
+                    if !line.trim().is_empty() && !self.extract_chapter_number(line).is_some() && self.extract_book_name(line).is_none() {
+                        last_verse.text.push(' ');
+                        last_verse.text.push_str(line.trim());
+                    }
+                }
             }
         }
 
@@ -280,7 +287,7 @@ impl TextParser {
         version: &str,
     ) -> Result<Chapter> {
         let format = BibleFormat::from_str(version)?;
-        let verses = self.extract_verses(chapter_text, &format)?;
+        let verses = self.extract_verses(chapter_text, &format, chapter)?;
 
         let mut verse_map = HashMap::new();
         for verse_data in verses {
@@ -304,17 +311,86 @@ impl TextParser {
         })
     }
 
-    fn extract_verses(&self, text: &str, format: &BibleFormat) -> Result<Vec<VerseData>> {
+    fn extract_verses(&self, text: &str, format: &BibleFormat, chapter: u32) -> Result<Vec<VerseData>> {
         let mut verses = Vec::new();
         let lines: Vec<&str> = text.lines().collect();
 
         for line in lines {
             if let Some(verse) = self.parse_verse_line(line, format)? {
-                verses.push(verse);
+                let processed_verse = self.split_embedded_verses(verse, format, chapter)?;
+                verses.extend(processed_verse);
+            } else if let Some(last_verse) = verses.last_mut() {
+                let trimmed = line.trim();
+                if !trimmed.is_empty() && !trimmed.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+                    last_verse.text.push(' ');
+                    last_verse.text.push_str(trimmed);
+                }
             }
         }
 
         Ok(verses)
+    }
+
+    fn split_embedded_verses(&self, verse: VerseData, format: &BibleFormat, chapter: u32) -> Result<Vec<VerseData>> {
+        let embedded_verse_pattern = Regex::new(r"\s+(\d+):(\d+)(?:\s+|$)")
+            .context("Failed to compile embedded verse pattern")?;
+        
+        let mut result = Vec::new();
+        let mut current_text = verse.text.clone();
+        let mut current_number = verse.number.clone();
+        
+        loop {
+            if let Some(captures) = embedded_verse_pattern.captures(&current_text) {
+                let chapter_ref: u32 = captures.get(1).unwrap().as_str().parse().unwrap_or(0);
+                let verse_ref = captures.get(2).unwrap().as_str().to_string();
+                
+                if chapter_ref == chapter {
+                    let full_match = captures.get(0).unwrap();
+                    let split_pos = full_match.start();
+                    let text_before = current_text[..split_pos].trim().to_string();
+                    let text_after = current_text[full_match.end()..].trim().to_string();
+                    
+                    if !text_before.is_empty() {
+                        result.push(VerseData {
+                            number: current_number.clone(),
+                            text: text_before,
+                            footnotes: self.extract_footnotes(&current_text[..split_pos], format)?,
+                        });
+                    }
+                    
+                    if !text_after.is_empty() {
+                        current_number = verse_ref;
+                        current_text = text_after;
+                        continue;
+                    } else {
+                        break;
+                    }
+                } else {
+                    let text = current_text.clone();
+                    result.push(VerseData {
+                        number: current_number,
+                        text: text.clone(),
+                        footnotes: self.extract_footnotes(&text, format)?,
+                    });
+                    break;
+                }
+            } else {
+                if !current_text.trim().is_empty() {
+                    result.push(VerseData {
+                        number: current_number,
+                        text: current_text.trim().to_string(),
+                        footnotes: self.extract_footnotes(&current_text, format)?,
+                    });
+                }
+                break;
+            }
+        }
+        
+        if result.is_empty() {
+            Ok(vec![verse])
+        } else {
+            Ok(result)
+        }
     }
 
     fn create_verse(
