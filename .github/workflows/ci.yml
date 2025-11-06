@@ -146,19 +146,50 @@ jobs:
           echo "Checking version index files..."
           if [ -f "out/bible/asv/index.html" ]; then
             echo "✓ ASV index.html exists"
+            ls -lh out/bible/asv/index.html
           else
             echo "✗ ASV index.html missing!"
+            echo "Contents of out/bible/asv/:"
+            ls -la out/bible/asv/ | head -10
           fi
           if [ -f "out/bible/kjv/index.html" ]; then
             echo "✓ KJV index.html exists"
+            ls -lh out/bible/kjv/index.html
           else
             echo "✗ KJV index.html missing!"
+            echo "Contents of out/bible/kjv/:"
+            ls -la out/bible/kjv/ | head -10
           fi
           if [ -f "out/bible/web/index.html" ]; then
             echo "✓ WEB index.html exists"
+            ls -lh out/bible/web/index.html
           else
             echo "✗ WEB index.html missing!"
+            echo "Contents of out/bible/web/:"
+            ls -la out/bible/web/ | head -10
           fi
+          echo "All index.html files in out/bible:"
+          find out/bible -name "index.html" -type f
+          echo ""
+          echo "Verifying all required index files exist..."
+          MISSING=0
+          if [ ! -f "out/bible/asv/index.html" ]; then
+            echo "ERROR: ASV index.html is missing!"
+            MISSING=1
+          fi
+          if [ ! -f "out/bible/kjv/index.html" ]; then
+            echo "ERROR: KJV index.html is missing!"
+            MISSING=1
+          fi
+          if [ ! -f "out/bible/web/index.html" ]; then
+            echo "ERROR: WEB index.html is missing!"
+            MISSING=1
+          fi
+          if [ $MISSING -eq 1 ]; then
+            echo "FATAL: Required index files are missing. Build will fail."
+            exit 1
+          fi
+          echo "✓ All version index files verified"
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
