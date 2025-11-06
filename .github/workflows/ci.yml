@@ -194,6 +194,15 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
+      - name: Verify artifact contents
+        run: |
+          echo "Verifying files that will be uploaded..."
+          echo "Checking for index files in artifact:"
+          find out/bible -name "index.html" -type f | head -10
+          echo "Total HTML files: $(find out -name '*.html' -type f | wc -l)"
+          echo "Checking out/bible/kjv/ structure:"
+          ls -la out/bible/kjv/ | head -10
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
