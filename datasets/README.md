@@ -24,6 +24,14 @@ All Bible files follow this format:
 - **Source**: Project Gutenberg (public domain)
 - **Lines**: 33,084
 
+### BSB (Berean Standard Bible)
+- **File**: `bsb.txt`
+- **Status**: ✓ Complete
+- **Source**: Berean Bible Translation Committee (public domain, dedicated April 30, 2023)
+- **Download**: https://berean.bible/downloads.htm
+- **Lines**: 32,305
+- **Citation**: "Holy Bible, Berean Standard Bible (BSB)"
+
 ## Usage
 
 The Bible Static Generator reads these files via the `--datasets` flag:

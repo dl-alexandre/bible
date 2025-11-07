@@ -86,6 +86,17 @@ def clean_usfm_text(text):
     # Remove any remaining backslash control sequences
     text = re.sub(r'\\[A-Za-z0-9*]+\s*', '', text)
     
+    # Remove standalone USFM marker remnants (b, m, q1, q2, s1, s2, li1, pmo, etc.)
+    # These are formatting markers that may appear as standalone words
+    text = re.sub(r'\b[bmsq]\s+[bmsq]\b', '', text)  # Remove "b m", "s q" patterns
+    text = re.sub(r'\b[bmsq]\d*\b', '', text)  # Remove standalone markers like "b", "m", "q1", "q2", "s1", "s2"
+    text = re.sub(r'\bli\d+\b', '', text)  # Remove list markers like "li1", "li2"
+    text = re.sub(r'\bpmo\b', '', text)  # Remove paragraph marker "pmo"
+    text = re.sub(r'\bp\b', '', text)  # Remove paragraph marker "p" (but be careful not to remove words)
+    # Remove section headings that appear mid-verse (like "The First Day", "The Second Day")
+    # These typically appear after verse text and before the next verse
+    text = re.sub(r'\s+The\s+(First|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth)\s+Day\s*', '', text, flags=re.IGNORECASE)
+    
     # Clean up whitespace and punctuation spacing
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'\s+([,.;:!?])', r'\1', text)  # Remove space before punctuation
@@ -98,13 +109,36 @@ def clean_usfm_text(text):
     
     return text
 
+def preprocess_usfm_line(line):
+    """Remove cross-references and footnotes before parsing"""
+    # Remove cross-references \x ... \x*
+    line = re.sub(r'\\x\s+[^\\]*?\\x\*', '', line)
+    # Remove footnotes \f ... \f* (handle both simple and complex formats)
+    line = re.sub(r'\\f\s+[^\\]*?\\fr\s+[^\\]*?\\ft\s+[^\\]*?\\f\*', '', line)
+    line = re.sub(r'\\f[^\\]*?\\f\*', '', line)
+    return line
+
 def parse_usfm_file(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     
     book_code = None
-    for code, name in book_names.items():
-        if code in Path(filepath).name.upper():
+    filename_upper = Path(filepath).name.upper()
+    # Match book codes in order of specificity
+    # Sort by: 1) length descending, 2) non-digit-prefixed first, 3) alphabetically
+    # This ensures "COL" matches before "2CO" can match "52COLBSB"
+    import re
+    def sort_key(code):
+        # Return tuple: (-length, is_digit_prefixed, code)
+        # is_digit_prefixed: 0 for codes starting with digit, 1 for others
+        is_digit = 1 if code[0].isdigit() else 0
+        return (-len(code), is_digit, code)
+    
+    sorted_codes = sorted(book_names.keys(), key=sort_key)
+    for code in sorted_codes:
+        # Simple substring match - since we check longer codes and non-digit codes first,
+        # "COL" will match "52COLBSB" before "2CO" can match
+        if code in filename_upper:
             book_code = code
             break
     
@@ -115,14 +149,18 @@ def parse_usfm_file(filepath):
     chapters = []
     
     current_chapter = None
-    current_verses = []
+    current_verses = {}  # Use dict to handle duplicates: verse_num -> text
     current_verse_num = None
     current_verse_text = []
     
-    # Pattern to match verse markers: \v 1 text...
+    # Pattern to match verse markers ONLY at start of line: ^\v <num>
     verse_pattern = re.compile(r'^\\v\s+(\d+)\s+(.*)$')
     
     for line in lines:
+        original_line = line.rstrip()
+        
+        # Preprocess: remove cross-refs and footnotes
+        line = preprocess_usfm_line(original_line)
         line = line.rstrip()
         
         # Skip metadata lines
@@ -130,52 +168,66 @@ def parse_usfm_file(filepath):
            line.startswith('\\toc') or line.startswith('\\mt'):
             continue
         
-        # Chapter marker: \c 1
+        # Chapter marker: \c 1 (only at start of line)
         if line.startswith('\\c'):
             match = re.match(r'\\c\s+(\d+)', line)
             if match:
                 # Save previous chapter if exists
                 if current_chapter is not None and current_verses:
-                    chapters.append((current_chapter, current_verses))
+                    # Convert dict to list for output
+                    verse_list = [(num, text) for num, text in sorted(current_verses.items())]
+                    chapters.append((current_chapter, verse_list))
                 
                 current_chapter = int(match.group(1))
-                current_verses = []
+                current_verses = {}
                 current_verse_num = None
                 current_verse_text = []
             continue
         
-        # Verse marker: \v 1 text...
+        # Verse marker: ONLY lines starting with \v <num>
         verse_match = verse_pattern.match(line)
         if verse_match:
             # Save previous verse if exists
-            if current_verse_num is not None:
+            if current_verse_num is not None and current_verse_text:
                 verse_text = ' '.join(current_verse_text).strip()
                 verse_text = clean_usfm_text(verse_text)
                 if verse_text:
-                    current_verses.append((current_verse_num, verse_text))
+                    # Merge if duplicate verse number exists
+                    if current_verse_num in current_verses:
+                        current_verses[current_verse_num] += " " + verse_text
+                    else:
+                        current_verses[current_verse_num] = verse_text
             
             current_verse_num = int(verse_match.group(1))
-            current_verse_text = [verse_match.group(2)]
+            current_verse_text = [verse_match.group(2)] if verse_match.group(2).strip() else []
             continue
         
-        # Continuation of verse text
+        # Continuation of verse text (only if we're in a verse)
         if current_verse_num is not None:
-            current_verse_text.append(line)
+            # Skip lines that start with \v (these are embedded, not continuations)
+            if not line.startswith('\\v'):
+                current_verse_text.append(line)
     
     # Save last verse and chapter
-    if current_verse_num is not None:
+    if current_verse_num is not None and current_verse_text:
         verse_text = ' '.join(current_verse_text).strip()
         verse_text = clean_usfm_text(verse_text)
         if verse_text:
-            current_verses.append((current_verse_num, verse_text))
+            if current_verse_num in current_verses:
+                current_verses[current_verse_num] += " " + verse_text
+            else:
+                current_verses[current_verse_num] = verse_text
     
     if current_chapter is not None and current_verses:
-        chapters.append((current_chapter, current_verses))
+        verse_list = [(num, text) for num, text in sorted(current_verses.items())]
+        chapters.append((current_chapter, verse_list))
     
     return book_name, chapters
 
 def convert_usfm_directory(input_dir, output_file):
-    usfm_files = sorted(Path(input_dir).glob("*.usfm"))
+    usfm_files = sorted(list(Path(input_dir).glob("*.usfm")) + 
+                       list(Path(input_dir).glob("*.SFM")) + 
+                       list(Path(input_dir).glob("*.sfm")))
     
     # Filter out front matter
     usfm_files = [f for f in usfm_files if not f.name.startswith('00-')]
@@ -186,6 +238,7 @@ def convert_usfm_directory(input_dir, output_file):
     
     output_lines = []
     processed_books = {}
+    duplicate_warnings = []
     
     # Sort files by book order
     def get_book_code(filename):
@@ -208,6 +261,19 @@ def convert_usfm_directory(input_dir, output_file):
         output_lines.append(book_name)
         
         for chapter_num, verses in chapters:
+            # Sanity check: count unique verse numbers
+            verse_nums = [v[0] for v in verses]
+            unique_verses = len(set(verse_nums))
+            total_verses = len(verse_nums)
+            
+            if unique_verses != total_verses:
+                # Find duplicates
+                from collections import Counter
+                verse_counts = Counter(verse_nums)
+                duplicates = {v: c for v, c in verse_counts.items() if c > 1}
+                for verse_num, count in duplicates.items():
+                    duplicate_warnings.append(f"{book_name} Chapter {chapter_num}, Verse {verse_num}: {count} occurrences (merged)")
+            
             output_lines.append(f"Chapter {chapter_num}")
             for verse_num, verse_text in sorted(verses, key=lambda x: x[0]):
                 output_lines.append(f"{verse_num} {verse_text}")
@@ -222,6 +288,12 @@ def convert_usfm_directory(input_dir, output_file):
             f.write('\n')
     
     print(f"Converted {len(processed_books)} books to {output_file} ({len(output_lines)} lines)")
+    if duplicate_warnings:
+        print(f"\nDuplicate verse warnings (merged): {len(duplicate_warnings)}")
+        for warning in duplicate_warnings[:10]:  # Show first 10
+            print(f"  {warning}")
+        if len(duplicate_warnings) > 10:
+            print(f"  ... and {len(duplicate_warnings) - 10} more")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

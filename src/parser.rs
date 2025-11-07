@@ -11,6 +11,7 @@ pub enum BibleFormat {
     ASV,
     WEB,
     OEB,
+    BSB,
 }
 
 impl BibleFormat {
@@ -20,6 +21,7 @@ impl BibleFormat {
             "asv" => Ok(BibleFormat::ASV),
             "web" => Ok(BibleFormat::WEB),
             "oeb" => Ok(BibleFormat::OEB),
+            "bsb" => Ok(BibleFormat::BSB),
             _ => Err(anyhow::anyhow!("Unknown Bible format: {}", s)),
         }
     }
@@ -168,7 +170,7 @@ impl TextParser {
     pub(crate) fn extract_book_name(&self, line: &str) -> Option<String> {
         let trimmed = line.trim();
         
-        if trimmed.is_empty() || trimmed.chars().next().unwrap_or(' ').is_ascii_digit() {
+        if trimmed.is_empty() {
             return None;
         }
 
@@ -188,14 +190,14 @@ impl TextParser {
         ];
 
         for book in &book_names {
-            if trimmed == *book || trimmed.starts_with(book) && (trimmed.len() == book.len() || trimmed.chars().nth(book.len()).map_or(false, |c| c.is_whitespace() || c.is_ascii_digit())) {
+            if trimmed == *book {
                 return Some(book.to_string());
             }
         }
 
         if self.book_name_pattern.is_match(trimmed) && trimmed.len() > 2 && !trimmed.contains("Chapter") {
             let parts: Vec<&str> = trimmed.split_whitespace().collect();
-            if parts.len() <= 4 && parts.iter().all(|p| p.chars().next().map_or(false, |c| c.is_uppercase())) {
+            if parts.len() <= 4 && parts.iter().all(|p| p.chars().next().map_or(false, |c| c.is_uppercase() || c.is_ascii_digit())) {
                 return Some(trimmed.to_string());
             }
         }
@@ -332,64 +334,71 @@ impl TextParser {
     }
 
     fn split_embedded_verses(&self, verse: VerseData, format: &BibleFormat, chapter: u32) -> Result<Vec<VerseData>> {
-        let embedded_verse_pattern = Regex::new(r"\s+(\d+):(\d+)(?:\s+|$)")
-            .context("Failed to compile embedded verse pattern")?;
-        
-        let mut result = Vec::new();
-        let mut current_text = verse.text.clone();
-        let mut current_number = verse.number.clone();
-        
-        loop {
-            if let Some(captures) = embedded_verse_pattern.captures(&current_text) {
-                let chapter_ref: u32 = captures.get(1).unwrap().as_str().parse().unwrap_or(0);
-                let verse_ref = captures.get(2).unwrap().as_str().to_string();
+        match format {
+            BibleFormat::BSB => {
+                Ok(vec![verse])
+            },
+            _ => {
+                let embedded_verse_pattern = Regex::new(r"\s+(\d+):(\d+)(?:\s+|$)")
+                    .context("Failed to compile embedded verse pattern")?;
                 
-                if chapter_ref == chapter {
-                    let full_match = captures.get(0).unwrap();
-                    let split_pos = full_match.start();
-                    let text_before = current_text[..split_pos].trim().to_string();
-                    let text_after = current_text[full_match.end()..].trim().to_string();
-                    
-                    if !text_before.is_empty() {
-                        result.push(VerseData {
-                            number: current_number.clone(),
-                            text: text_before,
-                            footnotes: self.extract_footnotes(&current_text[..split_pos], format)?,
-                        });
-                    }
-                    
-                    if !text_after.is_empty() {
-                        current_number = verse_ref;
-                        current_text = text_after;
-                        continue;
+                let mut result = Vec::new();
+                let mut current_text = verse.text.clone();
+                let mut current_number = verse.number.clone();
+                
+                loop {
+                    if let Some(captures) = embedded_verse_pattern.captures(&current_text) {
+                        let chapter_ref: u32 = captures.get(1).unwrap().as_str().parse().unwrap_or(0);
+                        let verse_ref = captures.get(2).unwrap().as_str().to_string();
+                        
+                        if chapter_ref == chapter {
+                            let full_match = captures.get(0).unwrap();
+                            let split_pos = full_match.start();
+                            let text_before = current_text[..split_pos].trim().to_string();
+                            let text_after = current_text[full_match.end()..].trim().to_string();
+                            
+                            if !text_before.is_empty() {
+                                result.push(VerseData {
+                                    number: current_number.clone(),
+                                    text: text_before,
+                                    footnotes: self.extract_footnotes(&current_text[..split_pos], format)?,
+                                });
+                            }
+                            
+                            if !text_after.is_empty() {
+                                current_number = verse_ref;
+                                current_text = text_after;
+                                continue;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            let text = current_text.clone();
+                            result.push(VerseData {
+                                number: current_number,
+                                text: text.clone(),
+                                footnotes: self.extract_footnotes(&text, format)?,
+                            });
+                            break;
+                        }
                     } else {
+                        if !current_text.trim().is_empty() {
+                            result.push(VerseData {
+                                number: current_number,
+                                text: current_text.trim().to_string(),
+                                footnotes: self.extract_footnotes(&current_text, format)?,
+                            });
+                        }
                         break;
                     }
+                }
+                
+                if result.is_empty() {
+                    Ok(vec![verse])
                 } else {
-                    let text = current_text.clone();
-                    result.push(VerseData {
-                        number: current_number,
-                        text: text.clone(),
-                        footnotes: self.extract_footnotes(&text, format)?,
-                    });
-                    break;
+                    Ok(result)
                 }
-            } else {
-                if !current_text.trim().is_empty() {
-                    result.push(VerseData {
-                        number: current_number,
-                        text: current_text.trim().to_string(),
-                        footnotes: self.extract_footnotes(&current_text, format)?,
-                    });
-                }
-                break;
             }
-        }
-        
-        if result.is_empty() {
-            Ok(vec![verse])
-        } else {
-            Ok(result)
         }
     }
 

@@ -214,10 +214,12 @@ fn main() -> Result<()> {
 }
 
 fn detect_format(content: &str) -> BibleFormat {
-    if content.contains("Chapter") && content.contains("In the beginning") {
-        BibleFormat::KJV
+    if content.contains("Berean Standard Bible") || content.contains("BSB") {
+        BibleFormat::BSB
     } else if content.contains("WEB") || content.contains("World English Bible") {
         BibleFormat::WEB
+    } else if content.contains("Chapter") && content.contains("In the beginning") {
+        BibleFormat::KJV
     } else {
         BibleFormat::KJV
     }
