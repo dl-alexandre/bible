@@ -60,13 +60,39 @@ impl TextParser {
         let mut current_book: Option<BookData> = None;
         let mut current_chapter: Option<ChapterData> = None;
 
-        for line in lines {
+        for (idx, line) in lines.iter().enumerate() {
             let line = line.trim();
             if line.is_empty() {
                 continue;
             }
 
             if let Some(book_name) = self.extract_book_name(line) {
+                // Handle malformed files where a book name is immediately followed by another book name
+                // Example: "1 Samuel\n1 Kings\nChapter 1" - the chapters belong to "1 Samuel", not "1 Kings"
+                // If current book has no chapters yet, check if we just saw a book name recently
+                // If so, this might be a duplicate/malformed entry - skip it
+                let current_has_chapters = current_book.as_ref().map_or(false, |b| !b.chapters.is_empty());
+                let current_has_chapter_in_progress = current_chapter.is_some();
+                
+                // Check if previous non-empty line was also a book name
+                let prev_was_book = if idx > 0 {
+                    lines.iter()
+                        .take(idx)
+                        .rev()
+                        .find(|l| !l.trim().is_empty())
+                        .and_then(|l| self.extract_book_name(l.trim()))
+                        .is_some()
+                } else {
+                    false
+                };
+                
+                if !current_has_chapters && !current_has_chapter_in_progress && prev_was_book {
+                    // We just saw a book name, and now we see another book name
+                    // The previous book has no chapters yet, so skip this duplicate/malformed entry
+                    // The chapters that follow will be attributed to the previous book
+                    continue;
+                }
+                
                 if let Some(chapter) = current_chapter.take() {
                     if let Some(book) = &mut current_book {
                         book.chapters.push(chapter);
