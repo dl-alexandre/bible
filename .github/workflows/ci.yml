@@ -95,6 +95,7 @@ jobs:
             --datasets datasets/kjv.txt \
             --datasets datasets/asv.txt \
             --datasets datasets/web.txt \
+            --datasets datasets/bsb.txt \
             --out out \
             --minify-json \
             --gzip-json \
@@ -106,7 +107,7 @@ jobs:
             exit 1
           }
           echo "Removing JSON directories..."
-          rm -rf out/kjv out/asv out/web || true
+          rm -rf out/kjv out/asv out/web out/bsb || true
           echo "Moving files to correct structure for GitHub Pages..."
           if [ -f out/index.html ]; then
             mv out/index.html out/bible/index.html || true

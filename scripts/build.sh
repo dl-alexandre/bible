@@ -42,6 +42,7 @@ echo "Generating site..."
   --datasets datasets/kjv.txt \
   --datasets datasets/asv.txt \
   --datasets datasets/web.txt \
+  --datasets datasets/bsb.txt \
   --out "$OUT_DIR" \
   --base-url "$BASE_URL" \
   --minify-json \
@@ -52,7 +53,7 @@ echo "Generating site..."
 
 echo ""
 echo "Removing JSON chapter files (HTML-only mode)..."
-rm -rf "$OUT_DIR/kjv" "$OUT_DIR/asv" "$OUT_DIR/web"
+rm -rf "$OUT_DIR/kjv" "$OUT_DIR/asv" "$OUT_DIR/web" "$OUT_DIR/bsb"
 
 echo ""
 echo "Build complete! Site ready in $OUT_DIR/"
