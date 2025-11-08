@@ -8,6 +8,11 @@ datasets/*_raw.txt
 datasets/*_debug.txt
 datasets/*_test*.txt
 datasets/*_backup
+datasets/*.backup
+datasets/*_fresh.txt
+datasets/*_with_*.txt
+datasets/*_gutenberg.txt
+datasets/*_missing_*.txt
 datasets/*.zip
 datasets/bsb_usfm/
 scripts/__pycache__/
