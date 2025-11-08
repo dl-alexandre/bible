@@ -3,3 +3,13 @@
 /logs
 *.log
 .DS_Store
+datasets/*_source.txt
+datasets/*_raw.txt
+datasets/*_debug.txt
+datasets/*_test*.txt
+datasets/*_backup
+datasets/*.zip
+datasets/bsb_usfm/
+scripts/__pycache__/
+*.pyc
+__pycache__/
