@@ -14,6 +14,73 @@ body {
     padding: 20px;
 }
 
+@media (prefers-color-scheme: dark) {
+    body {
+        color: #e0e0e0;
+        background-color: #1a1a1a;
+    }
+
+    header h1 {
+        color: #e8f4f8;
+    }
+
+    .version-info {
+        color: #b0b0b0;
+    }
+
+    nav.breadcrumb {
+        border-bottom-color: #333;
+    }
+
+    nav.breadcrumb li:not(:last-child)::after {
+        color: #666;
+    }
+
+    nav.breadcrumb a {
+        color: #64b5f6;
+    }
+
+    .chapter-nav {
+        border-bottom-color: #333;
+    }
+
+    .chapter-nav a {
+        color: #64b5f6;
+        border-color: #64b5f6;
+    }
+
+    .chapter-nav a:hover {
+        background-color: #64b5f6;
+        color: #1a1a1a;
+    }
+
+    .verse {
+        border-left-color: #333;
+    }
+
+    .verse:hover {
+        background-color: #2a2a2a;
+        border-left-color: #64b5f6;
+    }
+
+    .verse-number {
+        color: #64b5f6;
+    }
+
+    footer {
+        border-top-color: #333;
+        color: #b0b0b0;
+    }
+
+    footer a {
+        color: #64b5f6;
+    }
+
+    section ul li a:hover {
+        background-color: #2a2a2a;
+    }
+}
+
 header h1 {
     color: #2c3e50;
     margin-bottom: 10px;
