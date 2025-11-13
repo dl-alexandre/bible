@@ -163,10 +163,13 @@ nav.breadcrumb a:hover {
     margin-right: 10px;
     min-width: 30px;
     text-decoration: none;
+    cursor: pointer;
+    user-select: none;
 }
 
 .verse-number:hover {
     text-decoration: underline;
+    opacity: 0.8;
 }
 
 .verse-text {
