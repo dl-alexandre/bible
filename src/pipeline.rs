@@ -203,6 +203,7 @@ impl ProcessingPipeline {
         chapters: &HashMap<String, Chapter>,
         version_code: &str,
         version_name: &str,
+        available_versions: &[(String, String)],
         template_dir: &Path,
         output_dir: &Path,
         crossrefs: Option<&CrossReferenceMap>,
@@ -221,7 +222,7 @@ impl ProcessingPipeline {
 
         for (chapter_key, chapter) in chapters {
             let chapter_path = html_generator
-                .generate_chapter_html(chapter, version_code, version_name, crossrefs)
+                .generate_chapter_html(chapter, version_code, version_name, available_versions, crossrefs)
                 .with_context(|| format!("Failed to generate HTML for {}", chapter_key))?;
 
             let redirects = html_generator

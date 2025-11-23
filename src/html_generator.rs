@@ -41,6 +41,7 @@ impl HtmlGenerator {
         chapter: &Chapter,
         version_code: &str,
         version_name: &str,
+        available_versions: &[(String, String)],
         _crossrefs: Option<&CrossReferenceMap>,
     ) -> Result<PathBuf> {
         let book_dir = self.output_base.join("bible").join(version_code).join(&chapter.book);
@@ -57,6 +58,7 @@ impl HtmlGenerator {
         context.insert("last_updated", &chapter.metadata.last_updated.as_deref().unwrap_or("Unknown"));
         context.insert("manifest_tag", r#"<link rel="manifest" href="/manifest.json">"#);
         context.insert("base_url", &self.base_url);
+        context.insert("available_versions", available_versions);
 
         let mut verses: Vec<VerseContext> = chapter
             .verses
@@ -341,7 +343,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "King James Version", None)
+            .generate_chapter_html(&chapter, "kjv", "King James Version", &[], None)
             .unwrap();
 
         assert!(output_path.exists());
@@ -376,7 +378,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -409,7 +411,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -429,7 +431,7 @@ mod tests {
         std::fs::write(
             template_dir.join("redirect.html"),
             r#"<html><head>
-            <meta http-equiv="refresh" content="0;url={{ target_url }}">
+            <meta http-equiv="refresh" content="0;url={{ target_url | safe }}">
             </head><body></body></html>"#,
         ).unwrap();
 
@@ -446,7 +448,9 @@ mod tests {
         
         let html = std::fs::read_to_string(&redirect_path).unwrap();
         assert!(html.contains("http-equiv=\"refresh\""));
-        assert!(html.contains("/bible/kjv/Genesis/1.html#v1"));
+        if !html.contains("/bible/kjv/Genesis/1.html#v1") {
+            panic!("HTML content: {}", html);
+        }
     }
 
     #[test]
@@ -474,10 +478,11 @@ mod tests {
         let logger = DiagnosticLogger::new(&log_dir).unwrap();
         
         let generator = HtmlGenerator::new(&template_dir, &output_dir, logger, "https://example.com").unwrap();
-        let chapter = create_genesis_1_kjv();
+        let mut chapter = create_genesis_1_kjv();
+        chapter.chapter = 2;
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -496,7 +501,15 @@ mod tests {
         std::fs::create_dir_all(&template_dir).unwrap();
         std::fs::write(
             template_dir.join("redirect.html"),
-            r#"<html><head><meta http-equiv="refresh" content="0;url={{ target_url }}"></head></html>"#,
+            r#"<html><head><meta http-equiv="refresh" content="0;url={{ target_url | safe }}"></head></html>"#,
+        ).unwrap();
+        std::fs::write(
+            template_dir.join("chapter.html"),
+            r#"<html><body></body></html>"#,
+        ).unwrap();
+        std::fs::write(
+            template_dir.join("chapter.html"),
+            r#"<html><body></body></html>"#,
         ).unwrap();
 
         let log_dir = temp_dir.path().join("logs");
@@ -506,7 +519,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let chapter_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", None)
+            .generate_chapter_html(&chapter.clone(), "kjv", "KJV", &[], None)
             .unwrap();
 
         let redirects = generator

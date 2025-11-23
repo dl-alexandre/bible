@@ -132,12 +132,18 @@ fn main() -> Result<()> {
     .context("Failed to create HTML generator")?;
 
     println!("Generating HTML pages...");
+    
+    let mut available_versions: Vec<(String, String)> = all_versions.keys()
+        .map(|code| (code.clone(), code.to_uppercase()))
+        .collect();
+    available_versions.sort_by(|a, b| a.0.cmp(&b.0));
+
     for (version_code, chapters) in &all_versions {
         let mut books_map: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
         
         for (chapter_key, chapter) in chapters {
             html_generator
-                .generate_chapter_html(chapter, version_code, &version_code.to_uppercase(), Some(&crossrefs))
+                .generate_chapter_html(chapter, version_code, &version_code.to_uppercase(), &available_versions, Some(&crossrefs))
                 .with_context(|| format!("Failed to generate HTML for {}", chapter_key))?;
             
             books_map

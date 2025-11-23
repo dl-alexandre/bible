@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ book }} {{ chapter }} - {{ version_name }}</title>
     <meta name="description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
-    
+
     <meta property="og:title" content="{{ book }} {{ chapter }} - {{ version_name }}">
     <meta property="og:description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ base_url }}bible/{{ version_code }}/{{ book }}/{{ chapter }}.html">
     <meta property="og:image" content="{{ base_url }}static/og-image.png">
-    
+
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ book }} {{ chapter }} - {{ version_name }}">
     <meta name="twitter:description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
     <meta name="twitter:image" content="{{ base_url }}static/og-image.png">
-    
+
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="/static/styles.css">
 </head>
+
 <body>
     <nav aria-label="Breadcrumb navigation">
         <ol class="breadcrumb">
@@ -33,17 +42,45 @@
 
     <header>
         <h1>{{ book }} {{ chapter }}</h1>
-        <p class="version-info">Version: <strong>{{ version_name }}</strong></p>
+        <div class="version-info">
+            Version: <strong>{{ version_name }}</strong>
+            {% if available_versions and available_versions | length > 1 %}
+            <div class="version-switcher">
+                <button class="version-switcher-btn" aria-label="Switch version" aria-expanded="false">
+                    Change
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="version-dropdown">
+                    <ul>
+                        {% for ver in available_versions %}
+                        <li>
+                            <a href="/bible/{{ ver.0 }}/{{ book }}/{{ chapter }}.html" {% if ver.0==version_code
+                                %}class="active" aria-current="true" {% endif %}>
+                                {{ ver.1 }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </header>
 
     <nav aria-label="Chapter navigation">
         <ul class="chapter-nav">
             {% if prev_chapter %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}.html" rel="prev" aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ prev_chapter }}.html" rel="prev"
+                    aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
             {% endif %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}/" aria-label="All chapters in {{ book }}">Chapters</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/" aria-label="All chapters in {{ book }}">Chapters</a>
+            </li>
             {% if next_chapter %}
-            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}.html" rel="next" aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
+            <li><a href="/bible/{{ version_code }}/{{ book }}/{{ next_chapter }}.html" rel="next"
+                    aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
             {% endif %}
         </ul>
     </nav>
@@ -52,8 +89,10 @@
         <article class="chapter-content">
             <div class="verses">
                 {% for verse in verses %}
-                <p id="v{{ verse.number }}" class="verse" data-verse="{{ verse.canonical_ref }}" data-anchor="{{ verse.anchor }}">
-                    <a href="#v{{ verse.number }}" class="verse-number" aria-label="Verse {{ verse.number }}" title="Link to verse {{ verse.number }}">{{ verse.number }}</a>
+                <p id="v{{ verse.number }}" class="verse" data-verse="{{ verse.canonical_ref }}"
+                    data-anchor="{{ verse.anchor }}">
+                    <a href="#v{{ verse.number }}" class="verse-number" aria-label="Verse {{ verse.number }}"
+                        title="Link to verse {{ verse.number }}">{{ verse.number }}</a>
                     <span class="verse-text">{{ verse.text }}</span>
                 </p>
                 {% endfor %}
@@ -67,6 +106,5 @@
 
     <script src="/static/verses.js"></script>
 </body>
+
 </html>
-
-

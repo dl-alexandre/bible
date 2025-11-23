@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting to {{ book }} {{ chapter }}:{{ verse }} - {{ version_name }}</title>
-    <meta http-equiv="refresh" content="0;url={{ target_url }}">
-    <link rel="canonical" href="{{ target_url }}">
+    <meta http-equiv="refresh" content="0;url={{ target_url | safe }}">
+    <link rel="canonical" href="{{ target_url | safe }}">
     <script>
         // Immediate redirect for better UX
-        window.location.replace("{{ target_url }}");
+        window.location.replace("{{ target_url | safe }}");
     </script>
 </head>
+
 <body>
     <main>
-        <p>Redirecting to <a href="{{ target_url }}">{{ book }} {{ chapter }}:{{ verse }} ({{ version_name }})</a>...</p>
+        <p>Redirecting to <a href="{{ target_url | safe }}">{{ book }} {{ chapter }}:{{ verse }} ({{ version_name
+                }})</a>...</p>
     </main>
 </body>
-</html>
 
+</html>
