@@ -29,7 +29,7 @@ impl SiteGenerator {
             .iter()
             .map(|(code, chapters)| (code, chapters.len()))
             .collect();
-        version_list.sort_by_key(|(code, _)| code.clone());
+        version_list.sort_by_key(|(code, _)| code.to_string());
 
         let mut html = String::new();
         html.push_str("<!DOCTYPE html>\n");
@@ -80,22 +80,24 @@ impl SiteGenerator {
         html.push_str("      <h2>Books</h2>\n");
         html.push_str("      <ul>\n");
 
-        let mut book_set = std::collections::HashSet::new();
-        for chapters in versions.values() {
+        let mut book_owner: HashMap<String, String> = HashMap::new();
+        for (version_code, chapters) in versions {
             for chapter_key in chapters.keys() {
-                let parts: Vec<&str> = chapter_key.split('.').collect();
-                if let Some(book_name) = parts.first() {
-                    book_set.insert(book_name.to_string());
+                if let Some(book_name) = chapter_key.split('.').next() {
+                    book_owner.entry(book_name.to_string()).or_insert_with(|| version_code.clone());
                 }
             }
         }
 
-        let mut sorted_books: Vec<String> = book_set.into_iter().collect();
+        let mut sorted_books: Vec<String> = book_owner.keys().cloned().collect();
         sorted_books.sort();
 
         for book in sorted_books {
-            let book_url = format!("/bible/kjv/{}/1.html", book);
-            html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
+            let version_code = book_owner.get(&book).cloned().unwrap_or_default();
+            if !version_code.is_empty() {
+                let book_url = format!("/bible/{}/{}/1.html", version_code, book);
+                html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
+            }
         }
 
         html.push_str("      </ul>\n");

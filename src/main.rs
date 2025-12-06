@@ -33,10 +33,6 @@ fn main() -> Result<()> {
 
     println!("Bible Static Generator starting...");
 
-    let schema_dir = Path::new("schema");
-    schema::generate_schemas(schema_dir)
-        .map_err(|e| anyhow::anyhow!("Schema generation failed: {}", e))?;
-
     if cli.validate_only {
         println!("Validation-only mode: checking schemas...");
         let log_dir = cli.log_dir.as_deref().unwrap_or_else(|| Path::new("logs"));
@@ -54,6 +50,11 @@ fn main() -> Result<()> {
     }
 
     let output_dir = &cli.out;
+    let schema_dir = output_dir.join("schema");
+    fs::create_dir_all(&schema_dir)
+        .context("Failed to create schema directory")?;
+    schema::generate_schemas(&schema_dir)
+        .map_err(|e| anyhow::anyhow!("Schema generation failed: {}", e))?;
     fs::create_dir_all(output_dir)
         .context("Failed to create output directory")?;
 
@@ -99,7 +100,7 @@ fn main() -> Result<()> {
             .unwrap_or("unknown")
             .to_string();
 
-        let format = detect_format(&content);
+        let format = detect_format(&content, &version_code);
 
         let (_source_text, chapters) = pipeline
             .process_version(&content, &format, &version_code)
@@ -134,37 +135,53 @@ fn main() -> Result<()> {
     println!("Generating HTML pages...");
     
     let mut available_versions: Vec<(String, String)> = all_versions.keys()
-        .map(|code| (code.clone(), code.to_uppercase()))
+        .map(|code| (code.clone(), version_display_name(code)))
         .collect();
     available_versions.sort_by(|a, b| a.0.cmp(&b.0));
 
     for (version_code, chapters) in &all_versions {
         let mut books_map: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
-        
-        for (chapter_key, chapter) in chapters {
-            html_generator
-                .generate_chapter_html(chapter, version_code, &version_code.to_uppercase(), &available_versions, Some(&crossrefs))
-                .with_context(|| format!("Failed to generate HTML for {}", chapter_key))?;
-            
-            books_map
-                .entry(chapter.book.clone())
-                .or_insert_with(Vec::new)
-                .push(chapter.chapter);
+        for chapter in chapters.values() {
+            books_map.entry(chapter.book.clone()).or_insert_with(Vec::new).push(chapter.chapter);
         }
-        
+
+        for chapters_list in books_map.values_mut() {
+            chapters_list.sort();
+            chapters_list.dedup();
+        }
+
+        for (book, chapter_numbers) in &books_map {
+            for (idx, chapter_num) in chapter_numbers.iter().enumerate() {
+                let key = format!("{}.{}", book, chapter_num);
+                if let Some(chapter) = chapters.get(&key) {
+                    let prev = if idx > 0 { Some(chapter_numbers[idx - 1]) } else { None };
+                    let next = if idx + 1 < chapter_numbers.len() { Some(chapter_numbers[idx + 1]) } else { None };
+                    html_generator
+                        .generate_chapter_html(
+                            chapter,
+                            version_code,
+                            &version_display_name(version_code),
+                            &available_versions,
+                            prev,
+                            next,
+                            Some(&crossrefs),
+                        )
+                        .with_context(|| format!("Failed to generate HTML for {}", key))?;
+                }
+            }
+        }
+
         let mut books: Vec<String> = books_map.keys().cloned().collect();
         books.sort();
-        
+
         for (book, chapter_numbers) in &books_map {
-            let mut sorted_chapters = chapter_numbers.clone();
-            sorted_chapters.sort();
             html_generator
-                .generate_book_index(version_code, &version_code.to_uppercase(), book, &sorted_chapters)
+                .generate_book_index(version_code, &version_display_name(version_code), book, chapter_numbers)
                 .with_context(|| format!("Failed to generate book index for {}", book))?;
         }
-        
+
         html_generator
-            .generate_version_index(version_code, &version_code.to_uppercase(), &books)
+            .generate_version_index(version_code, &version_display_name(version_code), &books)
             .with_context(|| format!("Failed to generate version index for {}", version_code))?;
     }
 
@@ -209,24 +226,39 @@ fn main() -> Result<()> {
     println!("Build complete!");
     println!("Errors: {}, Warnings: {}", report.summary.errors, report.summary.warnings);
 
-    if cli.gzip_json || cli.minify_json {
-        println!("Running validation checks...");
-        let validator = BuildValidator::new(output_dir, pipeline.logger.clone())?;
-        validator.validate_all_json_files()?;
-        validator.check_budgets()?;
-    }
+    println!("Running validation checks...");
+    let validator = BuildValidator::new(output_dir, pipeline.logger.clone())?;
+    validator.validate_all_json_files()?;
+    validator.check_budgets()?;
+    validator.check_determinism()?;
 
     Ok(())
 }
 
-fn detect_format(content: &str) -> BibleFormat {
-    if content.contains("Berean Standard Bible") || content.contains("BSB") {
+fn detect_format(content: &str, version_code: &str) -> BibleFormat {
+    let lower = version_code.to_lowercase();
+    if lower.contains("bsb") || content.contains("Berean Standard Bible") || content.contains("BSB") {
         BibleFormat::BSB
-    } else if content.contains("WEB") || content.contains("World English Bible") {
+    } else if lower.contains("web") || content.contains("WEB") || content.contains("World English Bible") {
         BibleFormat::WEB
+    } else if lower.contains("asv") || content.contains("American Standard Version") {
+        BibleFormat::ASV
+    } else if lower.contains("oeb") || content.contains("Open English Bible") {
+        BibleFormat::OEB
     } else if content.contains("Chapter") && content.contains("In the beginning") {
         BibleFormat::KJV
     } else {
         BibleFormat::KJV
+    }
+}
+
+fn version_display_name(code: &str) -> String {
+    match code.to_lowercase().as_str() {
+        "kjv" => "King James Version".to_string(),
+        "asv" => "American Standard Version".to_string(),
+        "web" => "World English Bible".to_string(),
+        "oeb" => "Open English Bible".to_string(),
+        "bsb" => "Berean Standard Bible".to_string(),
+        other => other.to_uppercase(),
     }
 }

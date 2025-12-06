@@ -55,6 +55,7 @@ impl TextNormalizer {
             .collect()
     }
 
+    #[allow(dead_code)]
     pub fn tokenize(&self, text: &str) -> Vec<String> {
         let normalized = self.normalize(text);
         normalized

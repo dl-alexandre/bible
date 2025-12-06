@@ -1,12 +1,11 @@
 use crate::logger::*;
 use crate::models::*;
-use crate::schema::validate_json;
 use anyhow::{Context, Result};
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -45,7 +44,13 @@ impl JsonGenerator {
             return Ok(());
         }
 
-        let schema_files = vec!["chapter-1.0.json", "manifest-1.0.json", "crossrefs-1.0.json"];
+        let schema_files = vec![
+            "chapter-1.0.json",
+            "manifest-1.0.json",
+            "crossrefs-1.0.json",
+            "versions-1.0.json",
+            "books-1.0.json",
+        ];
 
         for schema_file in schema_files {
             let schema_path = schema_dir.join(schema_file);
@@ -147,42 +152,41 @@ impl JsonGenerator {
     ) -> Result<PathBuf> {
         let output_path = self.output_base.join("versions.json");
 
-        let mut version_list: Vec<Value> = Vec::new();
+        let mut version_list: Vec<VersionEntry> = Vec::new();
 
         for (version_code, chapters) in versions {
-            let mut books = HashMap::new();
+            let mut books = HashSet::new();
             for chapter_key in chapters.keys() {
-                let parts: Vec<&str> = chapter_key.split('.').collect();
-                if let Some(book_name) = parts.first() {
-                    books.entry(book_name.to_string()).or_insert_with(|| {
-                        chapters
-                            .keys()
-                            .filter(|k| k.starts_with(book_name))
-                            .count()
-                    });
+                if let Some(book_name) = chapter_key.split('.').next() {
+                    books.insert(book_name.to_string());
                 }
             }
 
-            version_list.push(json!({
-                "code": version_code,
-                "name": version_code.to_uppercase(),
-                "book_count": books.len(),
-                "chapter_count": chapters.len(),
-            }));
+            version_list.push(VersionEntry {
+                code: version_code.to_string(),
+                name: version_code.to_uppercase(),
+                book_count: books.len(),
+                chapter_count: chapters.len(),
+            });
         }
 
-        version_list.sort_by_key(|v| v["code"].as_str().unwrap_or("").to_string());
+        version_list.sort_by(|a, b| a.code.cmp(&b.code));
 
-        let versions_json = json!({
-            "schema_version": "1.0",
-            "versions": version_list
-        });
+        let versions_json = VersionsJson {
+            schema_version: "1.0".to_string(),
+            versions: version_list,
+        };
 
         let json_str = if self.minify {
             serde_json::to_string(&versions_json)?
         } else {
             serde_json::to_string_pretty(&versions_json)?
         };
+
+        let json_value: Value = serde_json::from_str(&json_str)?;
+        if let Err(e) = self.compile_and_validate("versions-1.0.json", &json_value) {
+            self.logger.warning(format!("Versions JSON validation warning: {}", e), None);
+        }
 
         fs::write(&output_path, &json_str)
             .context("Failed to write versions.json")?;
@@ -202,44 +206,42 @@ impl JsonGenerator {
     ) -> Result<PathBuf> {
         let output_path = self.output_base.join("books.json");
 
-        let mut book_map: HashMap<String, Value> = HashMap::new();
+        let mut book_map: HashMap<String, usize> = HashMap::new();
 
         for chapters in versions.values() {
             for chapter_key in chapters.keys() {
-                let parts: Vec<&str> = chapter_key.split('.').collect();
-                if let Some(book_name) = parts.first() {
-                    book_map
-                        .entry(book_name.to_string())
-                        .and_modify(|e| {
-                            let chapter_count = e["chapter_count"].as_u64().unwrap_or(0);
-                            *e = json!({
-                                "name": book_name,
-                                "chapter_count": chapter_count.max(1),
-                            });
-                        })
-                        .or_insert_with(|| {
-                            json!({
-                                "name": book_name,
-                                "chapter_count": chapters.keys().filter(|k| k.starts_with(book_name)).count().max(1),
-                            })
-                        });
+                if let Some(book_name) = chapter_key.split('.').next() {
+                    let count = chapters
+                        .keys()
+                        .filter(|k| k.starts_with(book_name))
+                        .count()
+                        .max(1);
+                    book_map.insert(book_name.to_string(), count);
                 }
             }
         }
 
-        let mut book_list: Vec<Value> = book_map.values().cloned().collect();
-        book_list.sort_by_key(|b| b["name"].as_str().unwrap_or("").to_string());
+        let mut book_list: Vec<BookEntry> = book_map
+            .into_iter()
+            .map(|(name, chapter_count)| BookEntry { name, chapter_count })
+            .collect();
+        book_list.sort_by(|a, b| a.name.cmp(&b.name));
 
-        let books_json = json!({
-            "schema_version": "1.0",
-            "books": book_list
-        });
+        let books_json = BooksJson {
+            schema_version: "1.0".to_string(),
+            books: book_list,
+        };
 
         let json_str = if self.minify {
             serde_json::to_string(&books_json)?
         } else {
             serde_json::to_string_pretty(&books_json)?
         };
+
+        let json_value: Value = serde_json::from_str(&json_str)?;
+        if let Err(e) = self.compile_and_validate("books-1.0.json", &json_value) {
+            self.logger.warning(format!("Books JSON validation warning: {}", e), None);
+        }
 
         fs::write(&output_path, &json_str)
             .context("Failed to write books.json")?;
@@ -333,26 +335,12 @@ impl JsonGenerator {
         format!("{:x}", hasher.finalize())
     }
 
-    pub fn validate_json_against_schema(
-        &self,
-        json_value: &Value,
-        schema_name: &str,
-    ) -> Result<()> {
-        self.compile_and_validate(schema_name, json_value)
-            .or_else(|e| {
-                self.logger.warning(
-                    format!("Schema {} validation failed: {}", schema_name, e),
-                    None,
-                );
-                Ok(())
-            })
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::*;
+    use crate::models::{Chapter, ChapterMetadata, Verse};
     use tempfile::TempDir;
     use std::collections::HashMap;
 

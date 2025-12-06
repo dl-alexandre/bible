@@ -215,6 +215,17 @@ impl TextParser {
             "3 John", "Jude", "Revelation",
         ];
 
+        let mut parts: Vec<&str> = trimmed.split_whitespace().collect();
+        if let Some(last) = parts.last() {
+            if last.chars().all(|c| c.is_ascii_digit()) && parts.len() > 1 {
+                parts.pop();
+                let candidate = parts.join(" ");
+                if book_names.contains(&candidate.as_str()) {
+                    return Some(candidate);
+                }
+            }
+        }
+
         for book in &book_names {
             if trimmed == *book {
                 return Some(book.to_string());

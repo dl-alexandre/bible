@@ -179,6 +179,7 @@ impl ProcessingPipeline {
         Ok(mappings)
     }
 
+    #[allow(dead_code)]
     pub fn save_cross_references(
         &mut self,
         mappings: &CrossReferenceMap,
@@ -198,6 +199,7 @@ impl ProcessingPipeline {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn generate_html(
         &self,
         chapters: &HashMap<String, Chapter>,
@@ -220,21 +222,32 @@ impl ProcessingPipeline {
         let mut redirect_count = 0;
         let mut books_map: std::collections::HashMap<String, Vec<u32>> = std::collections::HashMap::new();
 
-        for (chapter_key, chapter) in chapters {
-            let chapter_path = html_generator
-                .generate_chapter_html(chapter, version_code, version_name, available_versions, crossrefs)
-                .with_context(|| format!("Failed to generate HTML for {}", chapter_key))?;
+        for chapter in chapters.values() {
+            books_map.entry(chapter.book.clone()).or_insert_with(Vec::new).push(chapter.chapter);
+        }
 
-            let redirects = html_generator
-                .generate_all_redirects(chapter, version_code, version_name, &chapter_path)
-                .with_context(|| format!("Failed to generate redirects for {}", chapter_key))?;
+        for chapters_list in books_map.values_mut() {
+            chapters_list.sort();
+            chapters_list.dedup();
+        }
 
-            redirect_count += redirects.len();
+        for (book, chapter_numbers) in &books_map {
+            for (idx, chapter_num) in chapter_numbers.iter().enumerate() {
+                let chapter_key = format!("{}.{}", book, chapter_num);
+                if let Some(chapter) = chapters.get(&chapter_key) {
+                    let prev = if idx > 0 { Some(chapter_numbers[idx - 1]) } else { None };
+                    let next = if idx + 1 < chapter_numbers.len() { Some(chapter_numbers[idx + 1]) } else { None };
+                    let chapter_path = html_generator
+                        .generate_chapter_html(chapter, version_code, version_name, available_versions, prev, next, crossrefs)
+                        .with_context(|| format!("Failed to generate HTML for {}", chapter_key))?;
 
-            books_map
-                .entry(chapter.book.clone())
-                .or_insert_with(Vec::new)
-                .push(chapter.chapter);
+                    let redirects = html_generator
+                        .generate_all_redirects(chapter, version_code, version_name, &chapter_path)
+                        .with_context(|| format!("Failed to generate redirects for {}", chapter_key))?;
+
+                    redirect_count += redirects.len();
+                }
+            }
         }
 
         let mut books: Vec<String> = books_map.keys().cloned().collect();
@@ -378,6 +391,7 @@ impl ProcessingPipeline {
             .context("Failed to generate diagnostic report")
     }
 
+    #[allow(dead_code)]
     pub fn generate_deterministic_build(
         &self,
         output_dir: &Path,
@@ -402,6 +416,7 @@ impl ProcessingPipeline {
         }
     }
 
+    #[allow(dead_code)]
     pub fn rotate_logs(&self) -> Result<()> {
         self.logger.rotate_logs(10)
     }

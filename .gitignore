@@ -18,3 +18,12 @@ datasets/bsb_usfm/
 scripts/__pycache__/
 *.pyc
 __pycache__/
+.vscode/
+.idea/
+*.swp
+.env
+.env.local
+venv/
+.venv/
+/.cargo/
+/.rustup/

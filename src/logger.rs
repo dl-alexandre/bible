@@ -205,7 +205,7 @@ mod tests {
     #[test]
     fn test_logging_levels() {
         let temp_dir = TempDir::new().unwrap();
-        let mut logger = DiagnosticLogger::new(temp_dir.path()).unwrap();
+        let logger = DiagnosticLogger::new(temp_dir.path()).unwrap();
 
         logger.info("Test info message".to_string());
         logger.warning("Test warning".to_string(), None);
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn test_generate_report() {
         let temp_dir = TempDir::new().unwrap();
-        let mut logger = DiagnosticLogger::new(temp_dir.path()).unwrap();
+        let logger = DiagnosticLogger::new(temp_dir.path()).unwrap();
 
         logger.info("Info message".to_string());
         logger.warning("Warning message".to_string(), None);

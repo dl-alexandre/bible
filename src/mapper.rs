@@ -613,10 +613,15 @@ impl CrossVersionMapper {
 
 #[derive(Debug, Clone)]
 pub struct ValidationSummary {
+    #[allow(dead_code)]
     pub total_references: usize,
+    #[allow(dead_code)]
     pub fully_mapped: usize,
+    #[allow(dead_code)]
     pub with_nulls: usize,
+    #[allow(dead_code)]
     pub with_conflicts: usize,
+    #[allow(dead_code)]
     pub coverage_rate: f64,
 }
 

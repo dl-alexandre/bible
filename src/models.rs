@@ -52,6 +52,7 @@ pub struct Verse {
 
 /// Bible version metadata
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct BibleVersion {
     pub code: String, // kjv, asv, web, oeb
     pub name: String,
@@ -61,6 +62,7 @@ pub struct BibleVersion {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct VersionMetadata {
     pub language: String,
     pub year: Option<u32>,
@@ -68,6 +70,7 @@ pub struct VersionMetadata {
 
 /// Book reference
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct BookReference {
     pub name: String,
     pub abbreviation: String,
@@ -76,6 +79,7 @@ pub struct BookReference {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub enum Testament {
     Old,
     New,
@@ -143,6 +147,32 @@ pub struct ApiEndpoints {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+pub struct VersionEntry {
+    pub code: String,
+    pub name: String,
+    pub book_count: usize,
+    pub chapter_count: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+pub struct VersionsJson {
+    pub schema_version: String,
+    pub versions: Vec<VersionEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+pub struct BookEntry {
+    pub name: String,
+    pub chapter_count: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+pub struct BooksJson {
+    pub schema_version: String,
+    pub books: Vec<BookEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum ConflictType {
     Split,
@@ -184,6 +214,7 @@ pub struct VerseReference {
 }
 
 impl VerseReference {
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String {
         format!("{}.{}.{}", self.book, self.chapter, self.verse)
     }
@@ -199,12 +230,14 @@ pub struct EnhancedMappingConflict {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+#[allow(dead_code)]
 pub struct ConflictDetail {
     pub version: String,
     pub reason: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+#[allow(dead_code)]
 pub struct NullEntry {
     pub version: String,
     pub reason: String,

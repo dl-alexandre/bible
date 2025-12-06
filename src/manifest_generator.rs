@@ -65,9 +65,9 @@ impl ManifestGenerator {
         schema_locations.insert("manifest".to_string(), format!("/schema/manifest-{}.json", schema_version));
         schema_locations.insert("chapter".to_string(), format!("/schema/chapter-{}.json", schema_version));
         schema_locations.insert("crossrefs".to_string(), format!("/schema/crossrefs-{}.json", schema_version));
+        schema_locations.insert("versions".to_string(), format!("/schema/versions-{}.json", schema_version));
+        schema_locations.insert("books".to_string(), format!("/schema/books-{}.json", schema_version));
 
-        let mut extensions = serde_json::Map::new();
-        
         let mapper_thresholds = mapper_thresholds.map(|(jaccard, levenshtein)| {
             crate::models::MapperThresholds {
                 jaccard,
@@ -85,7 +85,7 @@ impl ManifestGenerator {
             mapper_thresholds,
             versification,
             crossrefs_sha256,
-            extensions: json!(extensions),
+            extensions: json!({}),
         };
 
         Ok(manifest)

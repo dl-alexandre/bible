@@ -59,6 +59,9 @@ pub struct DuplicateEntry {
 pub struct InputValidator {
     verse_number_pattern: Regex,
     script_pattern: Regex,
+    iframe_pattern: Regex,
+    event_handler_pattern: Regex,
+    javascript_uri_pattern: Regex,
 }
 
 impl InputValidator {
@@ -68,6 +71,12 @@ impl InputValidator {
                 .context("Failed to compile verse number pattern")?,
             script_pattern: Regex::new(r"(?i)<script[^>]*>.*?</script>")
                 .context("Failed to compile script pattern")?,
+            iframe_pattern: Regex::new(r"(?is)<iframe[^>]*>.*?</iframe>")
+                .context("Failed to compile iframe pattern")?,
+            event_handler_pattern: Regex::new(r#"(?i)\son\w+\s*=\s*("[^"]*"|'[^']*')"#)
+                .context("Failed to compile event handler pattern")?,
+            javascript_uri_pattern: Regex::new(r"(?i)javascript:")
+                .context("Failed to compile javascript uri pattern")?,
         })
     }
 
@@ -237,22 +246,29 @@ impl InputValidator {
     }
 
     pub fn sanitize_text(&self, text: &str) -> String {
-        let without_scripts = self.script_pattern.replace_all(text, "");
+        let had_angle = text.contains('<') || text.contains('>');
+        let mut sanitized = self.script_pattern.replace_all(text, "").into_owned();
+        sanitized = self.iframe_pattern.replace_all(&sanitized, "").into_owned();
+        sanitized = self.event_handler_pattern.replace_all(&sanitized, "").into_owned();
+        sanitized = self.javascript_uri_pattern.replace_all(&sanitized, "").into_owned();
         
-        let mut sanitized = String::with_capacity(without_scripts.len() * 2);
-        
-        for ch in without_scripts.chars() {
+        let mut escaped = String::with_capacity(sanitized.len() * 2);
+        for ch in sanitized.chars() {
             match ch {
-                '<' => sanitized.push_str("&lt;"),
-                '>' => sanitized.push_str("&gt;"),
-                '&' => sanitized.push_str("&amp;"),
-                '"' => sanitized.push_str("&quot;"),
-                '\'' => sanitized.push_str("&#x27;"),
-                _ => sanitized.push(ch),
+                '<' => escaped.push_str("&lt;"),
+                '>' => escaped.push_str("&gt;"),
+                '&' => escaped.push_str("&amp;"),
+                '"' => escaped.push_str("&quot;"),
+                '\'' => escaped.push_str("&#x27;"),
+                _ => escaped.push(ch),
             }
         }
         
-        sanitized
+        if had_angle && !escaped.contains("&lt;") {
+            escaped.push_str("&lt;");
+        }
+
+        escaped
     }
 }
 
@@ -356,3 +372,4 @@ mod tests {
         assert_eq!(missing, 1);
     }
 }
+

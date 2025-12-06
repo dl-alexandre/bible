@@ -1,7 +1,6 @@
 use crate::logger::*;
 use crate::models::*;
 use anyhow::{Context, Result};
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use tera::{Tera, Context as TeraContext};
@@ -42,6 +41,8 @@ impl HtmlGenerator {
         version_code: &str,
         version_name: &str,
         available_versions: &[(String, String)],
+        prev_chapter: Option<u32>,
+        next_chapter: Option<u32>,
         _crossrefs: Option<&CrossReferenceMap>,
     ) -> Result<PathBuf> {
         let book_dir = self.output_base.join("bible").join(version_code).join(&chapter.book);
@@ -79,14 +80,9 @@ impl HtmlGenerator {
 
         context.insert("verses", &verses);
 
-        let prev_chapter = if chapter.chapter > 1 {
-            Some(chapter.chapter - 1)
-        } else {
-            None
-        };
         context.insert("prev_chapter", &prev_chapter);
 
-        context.insert("next_chapter", &Some(chapter.chapter + 1));
+        context.insert("next_chapter", &next_chapter);
 
         let html = self
             .tera
@@ -343,7 +339,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "King James Version", &[], None)
+            .generate_chapter_html(&chapter, "kjv", "King James Version", &[], None, None, None)
             .unwrap();
 
         assert!(output_path.exists());
@@ -378,7 +374,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None, None, None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -411,7 +407,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None, None, None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -482,7 +478,7 @@ mod tests {
         chapter.chapter = 2;
         
         let output_path = generator
-            .generate_chapter_html(&chapter, "kjv", "KJV", &[], None)
+            .generate_chapter_html(&chapter, "kjv", "KJV", &[], Some(1), Some(3), None)
             .unwrap();
 
         let html = std::fs::read_to_string(&output_path).unwrap();
@@ -519,7 +515,7 @@ mod tests {
         let chapter = create_genesis_1_kjv();
         
         let chapter_path = generator
-            .generate_chapter_html(&chapter.clone(), "kjv", "KJV", &[], None)
+            .generate_chapter_html(&chapter.clone(), "kjv", "KJV", &[], None, None, None)
             .unwrap();
 
         let redirects = generator

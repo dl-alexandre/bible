@@ -7,23 +7,25 @@ use std::path::Path;
 pub fn generate_schemas(schema_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir_all(schema_dir)?;
 
-    // Chapter schema
     let chapter_schema = schema_for!(ChapterJson);
     let chapter_json = serde_json::to_string_pretty(&chapter_schema)?;
     fs::write(schema_dir.join("chapter-1.0.json"), chapter_json)?;
 
-    // Manifest schema
     let manifest_schema = schema_for!(GlobalManifest);
     let manifest_json = serde_json::to_string_pretty(&manifest_schema)?;
     fs::write(schema_dir.join("manifest-1.0.json"), manifest_json)?;
 
-    // Crossrefs schema
     let crossrefs_schema = schema_for!(CrossReferenceMap);
     let crossrefs_json = serde_json::to_string_pretty(&crossrefs_schema)?;
     fs::write(schema_dir.join("crossrefs-1.0.json"), crossrefs_json)?;
 
-    // For books and versions, we need to define structs if not already.
-    // For now, placeholder or use existing.
+    let versions_schema = schema_for!(VersionsJson);
+    let versions_json = serde_json::to_string_pretty(&versions_schema)?;
+    fs::write(schema_dir.join("versions-1.0.json"), versions_json)?;
+
+    let books_schema = schema_for!(BooksJson);
+    let books_json = serde_json::to_string_pretty(&books_schema)?;
+    fs::write(schema_dir.join("books-1.0.json"), books_json)?;
 
     Ok(())
 }
