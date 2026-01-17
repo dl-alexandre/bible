@@ -28,6 +28,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 3000);
     }
 
+    function getBookAbbreviation(bookName) {
+        const abbreviations = {
+            "Genesis": "Gen", "Exodus": "Exod", "Leviticus": "Lev",
+            "Numbers": "Num", "Deuteronomy": "Deut", "Joshua": "Josh",
+            "Judges": "Judg", "Ruth": "Ruth", "1 Samuel": "1Sam",
+            "2 Samuel": "2Sam", "1 Kings": "1Kgs", "2 Kings": "2Kgs",
+            "1 Chronicles": "1Chr", "2 Chronicles": "2Chr", "Ezra": "Ezra",
+            "Nehemiah": "Neh", "Esther": "Esth", "Job": "Job",
+            "Psalm": "Ps", "Psalms": "Ps", "Proverbs": "Prov",
+            "Ecclesiastes": "Eccl", "Song of Solomon": "Song", "Song of Songs": "Song",
+            "Isaiah": "Isa", "Jeremiah": "Jer", "Lamentations": "Lam",
+            "Ezekiel": "Ezek", "Daniel": "Dan", "Hosea": "Hos",
+            "Joel": "Joel", "Amos": "Amos", "Obadiah": "Obad",
+            "Jonah": "Jonah", "Micah": "Mic", "Nahum": "Nah",
+            "Habakkuk": "Hab", "Zephaniah": "Zeph", "Haggai": "Hag",
+            "Zechariah": "Zech", "Malachi": "Mal",
+            "Matthew": "Matt", "Mark": "Mark", "Luke": "Luke",
+            "John": "John", "Acts": "Acts", "Romans": "Rom",
+            "1 Corinthians": "1Cor", "2 Corinthians": "2Cor", "Galatians": "Gal",
+            "Ephesians": "Eph", "Philippians": "Phil", "Colossians": "Col",
+            "1 Thessalonians": "1Thess", "2 Thessalonians": "2Thess",
+            "1 Timothy": "1Tim", "2 Timothy": "2Tim", "Titus": "Titus",
+            "Philemon": "Phlm", "Hebrews": "Heb",
+            "James": "James", "1 Peter": "1Pet", "2 Peter": "2Pet",
+            "1 John": "1John", "2 John": "2John", "3 John": "3John",
+            "Jude": "Jude", "Revelation": "Rev"
+        };
+        return abbreviations[bookName] || bookName;
+    }
+
     verseNumbers.forEach(verseNum => {
         verseNum.style.cursor = 'pointer';
         verseNum.title = 'Click to copy verse link';
@@ -42,9 +72,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const verseRef = verse.getAttribute('data-verse');
             const verseLink = window.location.href.split('#')[0] + '#' + verse.id;
 
-            // Format: "John 3:16 - For God so loved..."
-            // Or just the text and link? Let's keep it simple and useful.
-            const textToCopy = `${verseRef}\n${verseText}\n${verseLink}`;
+            const parts = verseRef.split('.');
+            const bookName = parts[0];
+            const chapter = parts[1];
+            const verseNum = parts[2];
+            const bookAbbrev = getBookAbbreviation(bookName);
+            const readableRef = `${bookAbbrev} ${chapter}:${verseNum}`;
+
+            const textToCopy = `${verseText} - ${readableRef}\n${verseLink}`;
 
             navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast('Verse copied to clipboard');
