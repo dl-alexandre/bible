@@ -50,6 +50,9 @@ fi
 if [ -f "static/study.js" ]; then
     cp static/study.js "$OUT_DIR/static/" && echo "✅ Copied study.js"
 fi
+if [ -f "static/search-worker.js" ]; then
+    cp static/search-worker.js "$OUT_DIR/static/" && echo "✅ Copied search-worker.js"
+fi
 if [ -f "static/sw.js" ]; then
     cp static/sw.js "$OUT_DIR/sw.js" && echo "✅ Copied service worker"
 fi

@@ -5,22 +5,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function render() {
         bookmarksList.replaceChildren();
-        JSON.parse(localStorage.getItem('bible:bookmarks') || '[]').forEach(bookmark => {
+        const bookmarks = JSON.parse(localStorage.getItem('bible:bookmarks') || '[]').sort((a, b) => a.label.localeCompare(b.label));
+        bookmarks.forEach((bookmark, index) => {
             const item = document.createElement('li');
             const link = document.createElement('a');
             link.href = bookmark.url;
-            link.textContent = bookmark.label;
-            item.appendChild(link);
+            link.textContent = `${bookmark.label}${bookmark.tag ? ` [${bookmark.tag}]` : ''}`;
+            const tag = document.createElement('button');
+            tag.textContent = 'Tag';
+            tag.onclick = () => {
+                bookmarks[index].tag = prompt('Bookmark tag', bookmark.tag || '') || '';
+                localStorage.setItem('bible:bookmarks', JSON.stringify(bookmarks));
+                render();
+            };
+            const remove = document.createElement('button');
+            remove.textContent = 'Delete';
+            remove.onclick = () => {
+                bookmarks.splice(index, 1);
+                localStorage.setItem('bible:bookmarks', JSON.stringify(bookmarks));
+                render();
+            };
+            item.append(link, ' ', tag, ' ', remove);
             bookmarksList.appendChild(item);
         });
 
         notesList.replaceChildren();
-        keys().filter(key => key.includes(':note:')).forEach(key => {
+        keys().filter(key => key.includes(':note:')).sort().forEach(key => {
             const note = localStorage.getItem(key);
             if (!note) return;
             const parts = key.split(':');
             const item = document.createElement('li');
             item.textContent = `${parts[1]} ${parts[2]} ${parts[3]}${parts[5] || ''}: ${note}`;
+            const remove = document.createElement('button');
+            remove.textContent = 'Delete';
+            remove.onclick = () => { localStorage.removeItem(key); render(); };
+            item.append(' ', remove);
             notesList.appendChild(item);
         });
     }

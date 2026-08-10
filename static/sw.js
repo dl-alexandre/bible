@@ -1,10 +1,11 @@
-const CACHE_NAME = 'bible-shell-v1';
+const CACHE_NAME = 'bible-shell-v2';
 const MAX_DYNAMIC_ENTRIES = 80;
 const SHELL = [
   '/bible/',
   '/bible/static/styles.css',
   '/bible/static/verses.js',
   '/bible/static/search.js',
+  '/bible/static/search-worker.js',
   '/bible/static/app.webmanifest'
 ];
 

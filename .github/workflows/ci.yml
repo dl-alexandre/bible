@@ -48,9 +48,13 @@ jobs:
       - name: Check browser scripts
         run: |
           node --check static/search.js
+          node --check static/search-worker.js
           node --check static/study.js
           node --check static/verses.js
           node --check static/sw.js
+
+      - name: Check datasets
+        run: python3 scripts/check_datasets.py datasets
 
   build-and-deploy:
     name: Build and Deploy
@@ -98,6 +102,7 @@ jobs:
           if [ -f "static/search.js" ]; then cp static/search.js out/static/; echo "✓ Copied search.js"; fi
           if [ -f "static/study.html" ]; then cp static/study.html out/static/; echo "✓ Copied study.html"; fi
           if [ -f "static/study.js" ]; then cp static/study.js out/static/; echo "✓ Copied study.js"; fi
+          if [ -f "static/search-worker.js" ]; then cp static/search-worker.js out/static/; echo "✓ Copied search-worker.js"; fi
           if [ -f "static/sw.js" ]; then cp static/sw.js out/sw.js; echo "✓ Copied service worker"; fi
           echo "Building site..."
           cargo run --release -- \
@@ -256,3 +261,10 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+      - name: Smoke test published site
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 https://dl-alexandre.ddns.net/bible/
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 https://dl-alexandre.ddns.net/bible/search-index-kjv.json
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 https://dl-alexandre.ddns.net/bible/static/study.html

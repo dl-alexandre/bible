@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.querySelector('#bookmark-button')?.addEventListener('click', () => {
         const bookmarks = JSON.parse(localStorage.getItem('bible:bookmarks') || '[]');
-        const bookmark = { url: `${window.location.pathname}${selectedVerse}`, label: `${page.dataset.book} ${page.dataset.chapter}${selectedVerse}` };
+        const bookmark = { url: `${window.location.pathname}${selectedVerse}`, label: `${page.dataset.book} ${page.dataset.chapter}${selectedVerse}`, tag: '' };
         if (!bookmarks.some(item => item.url === bookmark.url)) bookmarks.push(bookmark);
         localStorage.setItem('bible:bookmarks', JSON.stringify(bookmarks.slice(-100)));
         renderBookmarks();

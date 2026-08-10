@@ -6,6 +6,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!input || !results || !status) return;
 
     const baseUrl = document.querySelector('html').dataset.baseUrl || '/bible/';
+    const worker = new Worker(`${baseUrl}static/search-worker.js`);
+    worker.onmessage = event => {
+        const query = input.value.trim().toLowerCase();
+        const matches = event.data;
+        status.textContent = `${matches.length}${matches.length === 50 ? '+' : ''} result${matches.length === 1 ? '' : 's'}.`;
+        matches.forEach(entry => {
+            const item = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = entry.u;
+            link.textContent = `${entry.b} ${entry.c} · ${entry.v.toUpperCase()}`;
+            const snippet = document.createElement('p');
+            const position = entry.t.toLowerCase().indexOf(query);
+            snippet.textContent = position < 0 ? entry.t.slice(0, 180) : entry.t.slice(Math.max(0, position - 70), position + 140);
+            item.append(link, snippet);
+            results.appendChild(item);
+        });
+    };
     const initialVersion = new URLSearchParams(window.location.search).get('version');
     if (initialVersion && versionSelect?.querySelector(`option[value="${initialVersion}"]`)) {
         versionSelect.value = initialVersion;
@@ -40,21 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? Array.from(versionSelect?.options || []).map(option => option.value).filter(value => value !== 'all')
                 : [selectedVersion];
             index = (await Promise.all(versions.map(loadVersion))).flat();
-            const matches = index.filter(entry =>
-                `${entry.v} ${entry.b} ${entry.c} ${entry.t}`.toLowerCase().includes(query)
-            ).slice(0, 50);
-            status.textContent = `${matches.length}${matches.length === 50 ? '+' : ''} result${matches.length === 1 ? '' : 's'}.`;
-            matches.forEach(entry => {
-                const item = document.createElement('li');
-                const link = document.createElement('a');
-                link.href = entry.u;
-                link.textContent = `${entry.b} ${entry.c} · ${entry.v.toUpperCase()}`;
-                const snippet = document.createElement('p');
-                const position = entry.t.toLowerCase().indexOf(query);
-                snippet.textContent = position < 0 ? entry.t.slice(0, 180) : entry.t.slice(Math.max(0, position - 70), position + 140);
-                item.append(link, snippet);
-                results.appendChild(item);
-            });
+            worker.postMessage({ index, query });
         };
 
         input.addEventListener('input', render);
