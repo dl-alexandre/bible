@@ -1,4 +1,5 @@
 const CACHE_NAME = 'bible-shell-v1';
+const MAX_DYNAMIC_ENTRIES = 80;
 const SHELL = [
   '/bible/',
   '/bible/static/styles.css',
@@ -28,9 +29,22 @@ self.addEventListener('fetch', event => {
     fetch(event.request)
       .then(response => {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        caches.open(CACHE_NAME).then(async cache => {
+          await cache.put(event.request, copy);
+          const keys = await cache.keys();
+          const dynamicKeys = keys.filter(key => !SHELL.includes(new URL(key.url).pathname));
+          for (const key of dynamicKeys.slice(0, Math.max(0, dynamicKeys.length - MAX_DYNAMIC_ENTRIES))) {
+            await cache.delete(key);
+          }
+        });
         return response;
       })
       .catch(() => caches.match(event.request).then(cached => cached || caches.match('/bible/')))
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'CLEAR_CACHE') {
+    event.waitUntil(caches.delete(CACHE_NAME).then(() => caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL))));
+  }
 });

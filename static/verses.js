@@ -297,6 +297,11 @@ document.addEventListener('DOMContentLoaded', function () {
         deferredInstall = null;
         installButton.hidden = true;
     });
+    document.querySelector('#clear-offline')?.addEventListener('click', async () => {
+        const registration = await navigator.serviceWorker?.ready;
+        registration?.active?.postMessage({ type: 'CLEAR_CACHE' });
+        showToast('Offline chapter cache cleared');
+    });
 
     if ('serviceWorker' in navigator && page.dataset.baseUrl) {
         navigator.serviceWorker.register(`${page.dataset.baseUrl}sw.js`, {

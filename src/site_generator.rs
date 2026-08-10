@@ -66,6 +66,12 @@ impl SiteGenerator {
         html.push_str("      <h2 id=\"search-title\">Search the Bible</h2>\n");
         html.push_str("      <label for=\"search-input\">Search phrase, book, or translation</label>\n");
         html.push_str("      <input id=\"search-input\" type=\"search\" autocomplete=\"off\" placeholder=\"Try: beginning, Psalms, KJV\">\n");
+        html.push_str("      <label for=\"search-version\">Translation</label>\n");
+        html.push_str("      <select id=\"search-version\"><option value=\"all\">All translations</option>");
+        for (version_code, _) in &version_list {
+            html.push_str(&format!("<option value=\"{}\">{}</option>", version_code, version_code.to_uppercase()));
+        }
+        html.push_str("</select>\n");
         html.push_str("      <p id=\"search-status\" class=\"search-status\" role=\"status\"></p>\n");
         html.push_str("      <ol id=\"search-results\" class=\"search-results\"></ol>\n");
         html.push_str("    </section>\n");
@@ -73,7 +79,7 @@ impl SiteGenerator {
         html.push_str("      <h2>Available Versions</h2>\n");
         html.push_str("      <ul>\n");
 
-        for (version_code, chapter_count) in version_list {
+        for (version_code, chapter_count) in &version_list {
             let version_name = version_code.to_uppercase();
             html.push_str(&format!(
                 "        <li><a href=\"{}{}/\">{}</a> ({} chapters)</li>\n",
@@ -114,6 +120,7 @@ impl SiteGenerator {
         html.push_str("  <footer>\n");
         html.push_str(&format!("    <p><a href=\"{}manifest.json\">Manifest</a></p>\n", base_url));
         html.push_str(&format!("    <p><a href=\"{}provenance.html\">Data provenance</a></p>\n", base_url));
+        html.push_str(&format!("    <p><a href=\"{}static/study.html\">My Study</a></p>\n", base_url));
         html.push_str("  </footer>\n");
         html.push_str(&format!("  <script src=\"{}static/search.js\"></script>\n", base_url));
         html.push_str("</body>\n");
@@ -134,13 +141,11 @@ impl SiteGenerator {
         &self,
         versions: &HashMap<String, HashMap<String, Chapter>>,
         base_url: &str,
-    ) -> Result<PathBuf> {
-        let output_path = self.output_base.join("search-index.json");
-        let mut entries = Vec::new();
-
+    ) -> Result<()> {
         let mut version_codes: Vec<&String> = versions.keys().collect();
         version_codes.sort();
         for version in version_codes {
+            let mut entries = Vec::new();
             let mut chapters: Vec<&Chapter> = versions[version].values().collect();
             chapters.sort_by(|a, b| a.book.cmp(&b.book).then(a.chapter.cmp(&b.chapter)));
             for chapter in chapters {
@@ -155,19 +160,20 @@ impl SiteGenerator {
                     "u": format!("{}{}/{}/{}.html", base_url, version, chapter.book, chapter.chapter),
                 }));
             }
-        }
 
-        fs::write(&output_path, serde_json::to_string(&entries)?)
-            .context("Failed to write search index")?;
-        self.logger.info(format!("Generated search index ({} entries)", entries.len()));
-        Ok(output_path)
+            let output_path = self.output_base.join(format!("search-index-{}.json", version));
+            fs::write(&output_path, serde_json::to_string(&entries)?)
+                .context("Failed to write search index")?;
+            self.logger.info(format!("Generated search index {} ({} entries)", version, entries.len()));
+        }
+        Ok(())
     }
 
     pub fn generate_provenance(&self, source_files: &[PathBuf], base_url: &str) -> Result<PathBuf> {
         let output_path = self.output_base.join("provenance.html");
         let checksums = crate::manifest_generator::ManifestGenerator::compute_source_checksums(source_files)?;
         let mut html = String::from("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Data Provenance - Bible</title>");
-        html.push_str(&format!("<link rel=\"stylesheet\" href=\"{}static/styles.css\"></head><body><a class=\"skip-link\" href=\"#main-content\">Skip to content</a><main id=\"main-content\" class=\"provenance\"><p><a href=\"{}\">Home</a></p><h1>Data provenance</h1><p>Dataset checksums for this build are recorded below. Source texts remain subject to their respective licenses.</p><ul>", base_url, base_url));
+        html.push_str(&format!("<link rel=\"stylesheet\" href=\"{}static/styles.css\"></head><body><a class=\"skip-link\" href=\"#main-content\">Skip to content</a><main id=\"main-content\" class=\"provenance\"><p><a href=\"{}\">Home</a></p><h1>Data provenance</h1><p>Dataset checksums for this build are recorded below. Source texts remain subject to their respective licenses.</p><p>See <code>DATA_SOURCES.md</code> in the repository for source and licensing notes.</p><ul>", base_url, base_url));
         let mut entries: Vec<_> = checksums.iter().collect();
         entries.sort_by_key(|(path, _)| *path);
         for (path, checksum) in entries {

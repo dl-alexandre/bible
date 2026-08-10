@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Study - Bible</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <main id="main-content" class="provenance study-page">
+        <p><a href="../">Home</a></p>
+        <h1>My Study</h1>
+        <p>Bookmarks and notes stay in this browser. They are not uploaded.</p>
+        <div class="reading-tool-actions">
+            <button type="button" id="export-study">Export study data</button>
+            <label class="import-label" for="import-study">Import study data</label>
+            <input id="import-study" type="file" accept="application/json">
+            <button type="button" id="clear-study">Clear study data</button>
+        </div>
+        <section aria-labelledby="bookmarks-title">
+            <h2 id="bookmarks-title">Bookmarks</h2>
+            <ul id="study-bookmarks" class="study-list"></ul>
+        </section>
+        <section aria-labelledby="notes-title">
+            <h2 id="notes-title">Notes</h2>
+            <ul id="study-notes" class="study-list"></ul>
+        </section>
+    </main>
+    <script src="study.js"></script>
+</body>
+</html>

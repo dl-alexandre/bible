@@ -217,6 +217,23 @@ a:hover {
     font-size: 0.85rem;
 }
 
+.study-list {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0 24px;
+    padding-left: 20px;
+}
+
+.import-label {
+    align-self: center;
+    margin: 0 !important;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.82rem !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         scroll-behavior: auto !important;

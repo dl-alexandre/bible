@@ -2,20 +2,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     const input = document.querySelector('#search-input');
     const results = document.querySelector('#search-results');
     const status = document.querySelector('#search-status');
+    const versionSelect = document.querySelector('#search-version');
     if (!input || !results || !status) return;
 
     const baseUrl = document.querySelector('html').dataset.baseUrl || '/bible/';
+    const initialVersion = new URLSearchParams(window.location.search).get('version');
+    if (initialVersion && versionSelect?.querySelector(`option[value="${initialVersion}"]`)) {
+        versionSelect.value = initialVersion;
+    }
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl })
             .catch(error => console.warn('Offline support unavailable:', error));
     }
 
     try {
-        const response = await fetch(`${baseUrl}search-index.json`);
-        if (!response.ok) throw new Error(`Search index: ${response.status}`);
-        const index = await response.json();
+        let index = [];
+        const loaded = new Map();
+        const loadVersion = async version => {
+            if (!loaded.has(version)) {
+                const response = await fetch(`${baseUrl}search-index-${version}.json`);
+                if (!response.ok) throw new Error(`Search index: ${response.status}`);
+                loaded.set(version, await response.json());
+            }
+            return loaded.get(version);
+        };
 
-        const render = () => {
+        const render = async () => {
             const query = input.value.trim().toLowerCase();
             results.replaceChildren();
             if (query.length < 2) {
@@ -23,6 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            const selectedVersion = versionSelect?.value || 'all';
+            const versions = selectedVersion === 'all'
+                ? Array.from(versionSelect?.options || []).map(option => option.value).filter(value => value !== 'all')
+                : [selectedVersion];
+            index = (await Promise.all(versions.map(loadVersion))).flat();
             const matches = index.filter(entry =>
                 `${entry.v} ${entry.b} ${entry.c} ${entry.t}`.toLowerCase().includes(query)
             ).slice(0, 50);
@@ -41,6 +58,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         input.addEventListener('input', render);
+        versionSelect?.addEventListener('change', render);
+        const initialQuery = new URLSearchParams(window.location.search).get('q');
+        if (initialQuery) {
+            input.value = initialQuery;
+            render();
+        }
+        input.addEventListener('change', () => {
+            const url = new URL(window.location.href);
+            url.searchParams.set('q', input.value);
+            if (versionSelect?.value && versionSelect.value !== 'all') url.searchParams.set('version', versionSelect.value);
+            else url.searchParams.delete('version');
+            history.replaceState(null, '', url);
+        });
         document.addEventListener('keydown', event => {
             if (event.key === '/' && document.activeElement !== input) {
                 event.preventDefault();

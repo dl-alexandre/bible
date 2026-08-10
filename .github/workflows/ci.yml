@@ -16,7 +16,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -45,6 +45,13 @@ jobs:
       - name: Check schemas are present
         run: test -f schema/manifest-1.0.json
 
+      - name: Check browser scripts
+        run: |
+          node --check static/search.js
+          node --check static/study.js
+          node --check static/verses.js
+          node --check static/sw.js
+
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
@@ -54,7 +61,7 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -89,6 +96,8 @@ jobs:
           if [ -f "static/app.webmanifest" ]; then cp static/app.webmanifest out/static/; echo "✓ Copied app.webmanifest"; fi
           if [ -f "static/verses.js" ]; then cp static/verses.js out/static/; echo "✓ Copied verses.js"; fi
           if [ -f "static/search.js" ]; then cp static/search.js out/static/; echo "✓ Copied search.js"; fi
+          if [ -f "static/study.html" ]; then cp static/study.html out/static/; echo "✓ Copied study.html"; fi
+          if [ -f "static/study.js" ]; then cp static/study.js out/static/; echo "✓ Copied study.js"; fi
           if [ -f "static/sw.js" ]; then cp static/sw.js out/sw.js; echo "✓ Copied service worker"; fi
           echo "Building site..."
           cargo run --release -- \
@@ -130,9 +139,9 @@ jobs:
           if [ -f out/sw.js ]; then
             mv out/sw.js out/bible/sw.js
           fi
-          if [ -f out/search-index.json ]; then
-            mv out/search-index.json out/bible/search-index.json
-          fi
+          for index in out/search-index-*.json; do
+            [ -f "$index" ] && mv "$index" out/bible/
+          done
           if [ -f out/provenance.html ]; then
             mv out/provenance.html out/bible/provenance.html
           fi
@@ -224,9 +233,10 @@ jobs:
           fi
           echo "✓ All version index files verified"
           python3 scripts/check_output.py out/bible
+          python3 scripts/check_features.py out/bible
       
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
       
       - name: Verify artifact contents
         run: |
@@ -238,7 +248,7 @@ jobs:
           ls -la out/bible/kjv/ | head -10
       
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./out/bible
       

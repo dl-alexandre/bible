@@ -44,6 +44,12 @@ fi
 if [ -f "static/search.js" ]; then
     cp static/search.js "$OUT_DIR/static/" && echo "✅ Copied search.js"
 fi
+if [ -f "static/study.html" ]; then
+    cp static/study.html "$OUT_DIR/static/" && echo "✅ Copied study.html"
+fi
+if [ -f "static/study.js" ]; then
+    cp static/study.js "$OUT_DIR/static/" && echo "✅ Copied study.js"
+fi
 if [ -f "static/sw.js" ]; then
     cp static/sw.js "$OUT_DIR/sw.js" && echo "✅ Copied service worker"
 fi
@@ -85,9 +91,9 @@ fi
 if [ -f "$OUT_DIR/sw.js" ]; then
     mv "$OUT_DIR/sw.js" "$OUT_DIR/bible/sw.js"
 fi
-if [ -f "$OUT_DIR/search-index.json" ]; then
-    mv "$OUT_DIR/search-index.json" "$OUT_DIR/bible/search-index.json"
-fi
+for index in "$OUT_DIR"/search-index-*.json; do
+    [ -f "$index" ] && mv "$index" "$OUT_DIR/bible/"
+done
 if [ -f "$OUT_DIR/provenance.html" ]; then
     mv "$OUT_DIR/provenance.html" "$OUT_DIR/bible/provenance.html"
 fi

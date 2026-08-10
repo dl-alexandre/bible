@@ -94,6 +94,7 @@
             <button type="button" id="bookmark-button">Bookmark verse</button>
             <span id="offline-status" role="status">Online</span>
             <button type="button" id="install-button" hidden>Install app</button>
+            <button type="button" id="clear-offline">Clear offline cache</button>
         </div>
         <ul id="bookmark-list" class="bookmark-list" aria-label="Saved bookmarks"></ul>
         <label for="verse-note">Note for selected verse</label>
@@ -145,7 +146,7 @@
     </main>
 
     <footer>
-        <p>Last updated: {{ last_updated }}</p>
+        <p>Last updated: {{ last_updated }} · <a href="{{ base_url }}static/study.html">My Study</a></p>
     </footer>
 
     <script src="{{ base_url }}static/verses.js"></script>
