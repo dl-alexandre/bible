@@ -7,9 +7,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const baseUrl = document.querySelector('html').dataset.baseUrl || '/bible/';
     const worker = new Worker(`${baseUrl}static/search-worker.js`);
+    let debounceTimer;
+    let latestRequestId = 0;
+
     worker.onmessage = event => {
-        const query = input.value.trim().toLowerCase();
-        const matches = event.data;
+        if (event.data.requestId !== latestRequestId) return;
+        if (event.data.error) {
+            status.textContent = 'Search is unavailable offline until the selected index has been opened once.';
+            console.warn(event.data.error);
+            return;
+        }
+
+        const matches = event.data.matches;
+        results.replaceChildren();
         status.textContent = `${matches.length}${matches.length === 50 ? '+' : ''} result${matches.length === 1 ? '' : 's'}.`;
         matches.forEach(entry => {
             const item = document.createElement('li');
@@ -17,8 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             link.href = entry.u;
             link.textContent = `${entry.b} ${entry.c} · ${entry.v.toUpperCase()}`;
             const snippet = document.createElement('p');
-            const position = entry.t.toLowerCase().indexOf(query);
-            snippet.textContent = position < 0 ? entry.t.slice(0, 180) : entry.t.slice(Math.max(0, position - 70), position + 140);
+            snippet.textContent = entry.s;
             item.append(link, snippet);
             results.appendChild(item);
         });
@@ -33,20 +42,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        let index = [];
-        const loaded = new Map();
-        const loadVersion = async version => {
-            if (!loaded.has(version)) {
-                const response = await fetch(`${baseUrl}search-index-${version}.json`);
-                if (!response.ok) throw new Error(`Search index: ${response.status}`);
-                loaded.set(version, await response.json());
-            }
-            return loaded.get(version);
-        };
-
-        const render = async () => {
+        const render = () => {
             const query = input.value.trim().toLowerCase();
             results.replaceChildren();
+            clearTimeout(debounceTimer);
+            latestRequestId += 1;
             if (query.length < 2) {
                 status.textContent = 'Enter at least two characters.';
                 return;
@@ -56,8 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const versions = selectedVersion === 'all'
                 ? Array.from(versionSelect?.options || []).map(option => option.value).filter(value => value !== 'all')
                 : [selectedVersion];
-            index = (await Promise.all(versions.map(loadVersion))).flat();
-            worker.postMessage({ index, query });
+            const requestId = latestRequestId;
+            status.textContent = 'Searching...';
+            debounceTimer = setTimeout(() => {
+                worker.postMessage({ baseUrl, query, requestId, versions });
+            }, 200);
         };
 
         input.addEventListener('input', render);

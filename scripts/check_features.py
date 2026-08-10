@@ -13,6 +13,8 @@ def main():
     required_chapter = ("comparison-panel", "bookmark-button", "verse-note", "clear-offline")
     missing = [item for item in required_index if item not in index]
     missing.extend(item for item in required_chapter if item not in chapter)
+    if not (root / "static/search-worker.js").is_file():
+        missing.append("static/search-worker.js")
     if missing:
         print(f"Missing generated feature markers: {', '.join(missing)}", file=sys.stderr)
         return 1
