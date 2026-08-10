@@ -94,6 +94,7 @@ impl CrossVersionMapper {
         })
     }
 
+    #[allow(dead_code)]
     pub fn set_versification(&mut self, version: &str, scheme: &str) {
         self.versification_schemes.insert(version.to_string(), scheme.to_string());
     }
@@ -532,6 +533,7 @@ impl CrossVersionMapper {
         }
     }
 
+    #[allow(dead_code)]
     pub fn validate_mappings(&self, mappings: &CrossReferenceMap) -> Result<ValidationSummary> {
         let metrics = self.compute_metrics(mappings);
         
@@ -612,6 +614,7 @@ impl CrossVersionMapper {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct ValidationSummary {
     #[allow(dead_code)]
     pub total_references: usize,

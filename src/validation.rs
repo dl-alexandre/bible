@@ -43,11 +43,13 @@ pub struct DatasetStatistics {
     pub missing_verses: usize,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DuplicateReport {
     pub duplicates: Vec<DuplicateEntry>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DuplicateEntry {
     pub book: String,
@@ -224,6 +226,7 @@ impl InputValidator {
         missing.len()
     }
 
+    #[allow(dead_code)]
     pub fn detect_duplicates(&self, verses: &[VerseData]) -> DuplicateReport {
         let mut verse_counts: HashMap<String, usize> = HashMap::new();
 
@@ -372,4 +375,3 @@ mod tests {
         assert_eq!(missing, 1);
     }
 }
-

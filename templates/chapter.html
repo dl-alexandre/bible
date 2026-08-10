@@ -10,7 +10,8 @@
     <meta property="og:title" content="{{ book }} {{ chapter }} - {{ version_name }}">
     <meta property="og:description" content="{{ book }} chapter {{ chapter }} from {{ version_name }}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ base_url }}{{ version_code }}/{{ book }}/{{ chapter }}.html">
+    <meta property="og:url" content="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/{{ chapter }}.html">
+    <link rel="canonical" href="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/{{ chapter }}.html">
     <meta property="og:image" content="{{ base_url }}static/og-image.png">
 
     <meta name="twitter:card" content="summary_large_image">
@@ -36,7 +37,7 @@
         <ol class="breadcrumb">
             <li><a href="{{ base_url }}">Home</a></li>
             <li><a href="{{ base_url }}{{ version_code }}/">{{ version_name }}</a></li>
-            <li><a href="{{ base_url }}{{ version_code }}/{{ book }}/">{{ book }}</a></li>
+            <li><a href="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/">{{ book }}</a></li>
             <li aria-current="page">{{ book }} {{ chapter }}</li>
         </ol>
     </nav>
@@ -58,7 +59,7 @@
                     <ul>
                         {% for ver in available_versions %}
                         <li>
-                            <a href="{{ base_url }}{{ ver.0 }}/{{ book }}/{{ chapter }}.html" {% if ver.0==version_code
+                            <a href="{{ base_url }}{{ ver.0 }}/{{ book | urlencode }}/{{ chapter }}.html" {% if ver.0==version_code
                                 %}class="active" aria-current="true" {% endif %}>
                                 {{ ver.1 }}
                             </a>
@@ -74,13 +75,13 @@
     <nav aria-label="Chapter navigation">
         <ul class="chapter-nav">
             {% if prev_chapter %}
-            <li><a href="{{ base_url }}{{ version_code }}/{{ book }}/{{ prev_chapter }}.html" rel="prev"
+            <li><a href="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/{{ prev_chapter }}.html" rel="prev"
                     aria-label="Previous chapter: {{ book }} {{ prev_chapter }}">← {{ prev_chapter }}</a></li>
             {% endif %}
-            <li><a href="{{ base_url }}{{ version_code }}/{{ book }}/" aria-label="All chapters in {{ book }}">Chapters</a>
+            <li><a href="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/" aria-label="All chapters in {{ book }}">Chapters</a>
             </li>
             {% if next_chapter %}
-            <li><a href="{{ base_url }}{{ version_code }}/{{ book }}/{{ next_chapter }}.html" rel="next"
+            <li><a href="{{ base_url }}{{ version_code }}/{{ book | urlencode }}/{{ next_chapter }}.html" rel="next"
                     aria-label="Next chapter: {{ book }} {{ next_chapter }}">{{ next_chapter }} →</a></li>
             {% endif %}
         </ul>

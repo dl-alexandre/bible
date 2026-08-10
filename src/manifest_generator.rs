@@ -27,6 +27,7 @@ impl ManifestGenerator {
         })
     }
 
+    #[allow(dead_code)]
     pub fn with_timestamp(output_dir: &Path, logger: DiagnosticLogger, timestamp: DateTime<Utc>) -> Self {
         ManifestGenerator {
             output_base: output_dir.to_path_buf(),

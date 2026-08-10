@@ -134,7 +134,10 @@ impl HtmlGenerator {
 
         let target_url = self.site_url(&format!(
             "/{}/{}/{}.html#v{}",
-            version_code, book, chapter, verse
+            version_code,
+            urlencoding::encode(book),
+            chapter,
+            verse
         ));
 
         let mut context = TeraContext::new();
@@ -205,6 +208,7 @@ impl HtmlGenerator {
         html.push_str("  <meta charset=\"UTF-8\">\n");
         html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         html.push_str(&format!("  <title>{} - Bible Versions</title>\n", version_name));
+        html.push_str(&format!("  <link rel=\"canonical\" href=\"{}\">\n", self.site_url(&format!("/{}/", version_code))));
         html.push_str(&format!("  <meta name=\"description\" content=\"Browse all books in the {} translation of the Bible.\">\n", version_name));
         html.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}\">\n", self.site_url("/static/styles.css")));
         html.push_str("</head>\n");
@@ -224,7 +228,7 @@ impl HtmlGenerator {
         html.push_str("      <ul>\n");
 
         for book in books {
-            let book_url = self.site_url(&format!("/{}/{}/", version_code, book));
+            let book_url = self.site_url(&format!("/{}/{}/", version_code, urlencoding::encode(book)));
             html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
         }
 
@@ -265,6 +269,7 @@ impl HtmlGenerator {
         html.push_str("  <meta charset=\"UTF-8\">\n");
         html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         html.push_str(&format!("  <title>{} - {} - Bible</title>\n", book, version_name));
+        html.push_str(&format!("  <link rel=\"canonical\" href=\"{}\">\n", self.site_url(&format!("{}/{}/", version_code, urlencoding::encode(book)))));
         html.push_str(&format!("  <meta name=\"description\" content=\"Browse all chapters in {} ({}) translation.\">\n", book, version_name));
         html.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}\">\n", self.site_url("/static/styles.css")));
         html.push_str("</head>\n");
@@ -286,7 +291,7 @@ impl HtmlGenerator {
         html.push_str("      <ul>\n");
 
         for chapter in chapters {
-            let chapter_url = self.site_url(&format!("/{}/{}/{}.html", version_code, book, chapter));
+            let chapter_url = self.site_url(&format!("/{}/{}/{}.html", version_code, urlencoding::encode(book), chapter));
             html.push_str(&format!("        <li><a href=\"{}\">Chapter {}</a></li>\n", chapter_url, chapter));
         }
 

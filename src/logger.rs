@@ -174,6 +174,7 @@ impl DiagnosticLogger {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn build_id(&self) -> &str {
         &self.build_id
     }

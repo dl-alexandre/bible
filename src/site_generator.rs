@@ -6,6 +6,10 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use serde_json::json;
 
+fn encode_segment(value: &str) -> String {
+    urlencoding::encode(value).into_owned()
+}
+
 pub struct SiteGenerator {
     output_base: PathBuf,
     logger: DiagnosticLogger,
@@ -44,6 +48,7 @@ impl SiteGenerator {
         html.push_str("  <meta property=\"og:description\" content=\"Read the Bible online with multiple translations: KJV, ASV, and WEB. Browse by book, chapter, and verse.\">\n");
         html.push_str("  <meta property=\"og:type\" content=\"website\">\n");
         html.push_str(&format!("  <meta property=\"og:url\" content=\"{}\">\n", base_url));
+        html.push_str(&format!("  <link rel=\"canonical\" href=\"{}\">\n", base_url));
         html.push_str(&format!("  <meta property=\"og:image\" content=\"{}static/og-image.png\">\n", base_url));
         html.push_str("  <meta name=\"twitter:card\" content=\"summary_large_image\">\n");
         html.push_str("  <meta name=\"twitter:title\" content=\"Bible Static Site - Available Versions\">\n");
@@ -106,10 +111,17 @@ impl SiteGenerator {
         let mut sorted_books: Vec<String> = book_owner.keys().cloned().collect();
         sorted_books.sort();
 
+        html.push_str("      <label for=\"search-book\">Book</label>\n");
+        html.push_str("      <select id=\"search-book\"><option value=\"all\">All books</option>");
+        for book in &sorted_books {
+            html.push_str(&format!("<option value=\"{}\">{}</option>", book, book));
+        }
+        html.push_str("</select>\n");
+
         for book in sorted_books {
             let version_code = book_owner.get(&book).cloned().unwrap_or_default();
             if !version_code.is_empty() {
-                let book_url = format!("{}{}/{}/1.html", base_url, version_code, book);
+                let book_url = format!("{}{}/{}/1.html", base_url, version_code, encode_segment(&book));
                 html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
             }
         }
@@ -157,7 +169,8 @@ impl SiteGenerator {
                     "b": chapter.book,
                     "c": chapter.chapter,
                     "t": text,
-                    "u": format!("{}{}/{}/{}.html", base_url, version, chapter.book, chapter.chapter),
+                    "u": format!("{}{}/{}/{}.html", base_url, version, encode_segment(&chapter.book), chapter.chapter),
+                    "j": format!("{}{}/{}/{}.json", base_url, version, encode_segment(&chapter.book), chapter.chapter),
                 }));
             }
 
@@ -173,7 +186,7 @@ impl SiteGenerator {
         let output_path = self.output_base.join("provenance.html");
         let checksums = crate::manifest_generator::ManifestGenerator::compute_source_checksums(source_files)?;
         let mut html = String::from("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Data Provenance - Bible</title>");
-        html.push_str(&format!("<link rel=\"stylesheet\" href=\"{}static/styles.css\"></head><body><a class=\"skip-link\" href=\"#main-content\">Skip to content</a><main id=\"main-content\" class=\"provenance\"><p><a href=\"{}\">Home</a></p><h1>Data provenance</h1><p>Dataset checksums for this build are recorded below. Source texts remain subject to their respective licenses.</p><p>See <code>DATA_SOURCES.md</code> in the repository for source and licensing notes.</p><ul>", base_url, base_url));
+        html.push_str(&format!("<link rel=\"stylesheet\" href=\"{}static/styles.css\"><link rel=\"canonical\" href=\"{}provenance.html\"></head><body><a class=\"skip-link\" href=\"#main-content\">Skip to content</a><main id=\"main-content\" class=\"provenance\"><p><a href=\"{}\">Home</a></p><h1>Data provenance</h1><p>Dataset checksums for this build are recorded below. Source texts remain subject to their respective licenses.</p><p>See <code>DATA_SOURCES.md</code> in the repository for source and licensing notes.</p><ul>", base_url, base_url, base_url));
         let mut entries: Vec<_> = checksums.iter().collect();
         entries.sort_by_key(|(path, _)| *path);
         for (path, checksum) in entries {
@@ -245,7 +258,7 @@ impl SiteGenerator {
                 if parts.len() >= 2 {
                     let book = parts[0];
                     let chapter = parts[1];
-                    let chapter_url = format!("{}{}/{}/{}.html", base_url, version_code, book, chapter);
+                    let chapter_url = format!("{}{}/{}/{}.html", base_url, version_code, encode_segment(book), chapter);
                     xml.push_str("  <url>\n");
                     xml.push_str(&format!("    <loc>{}</loc>\n", chapter_url));
                     xml.push_str("    <changefreq>monthly</changefreq>\n");

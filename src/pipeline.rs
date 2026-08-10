@@ -20,6 +20,7 @@ pub struct ProcessingPipeline {
 }
 
 impl ProcessingPipeline {
+    #[allow(dead_code)]
     pub fn new(log_dir: &Path) -> Result<Self> {
         Ok(ProcessingPipeline {
             parser: TextParser::new()

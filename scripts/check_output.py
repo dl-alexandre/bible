@@ -4,7 +4,7 @@
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 
 class PageParser(HTMLParser):
@@ -25,7 +25,7 @@ def target_path(root, href):
     if parsed.scheme or parsed.netloc:
         if parsed.netloc and parsed.netloc != "dl-alexandre.github.io":
             return None
-    path = parsed.path
+    path = unquote(parsed.path)
     if not path.startswith("/bible/"):
         return None
     relative = path.removeprefix("/bible/")
