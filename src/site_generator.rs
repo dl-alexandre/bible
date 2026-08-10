@@ -48,8 +48,8 @@ impl SiteGenerator {
         html.push_str("  <meta name=\"twitter:title\" content=\"Bible Static Site - Available Versions\">\n");
         html.push_str("  <meta name=\"twitter:description\" content=\"Read the Bible online with multiple translations: KJV, ASV, and WEB. Browse by book, chapter, and verse.\">\n");
         html.push_str(&format!("  <meta name=\"twitter:image\" content=\"{}static/og-image.png\">\n", base_url));
-        html.push_str("  <link rel=\"manifest\" href=\"/manifest.json\">\n");
-        html.push_str("  <link rel=\"icon\" href=\"/static/favicon.ico\" type=\"image/x-icon\">\n");
+        html.push_str(&format!("  <link rel=\"manifest\" href=\"{}static/app.webmanifest\">\n", base_url));
+        html.push_str(&format!("  <link rel=\"icon\" href=\"{}static/favicon.ico\" type=\"image/x-icon\">\n", base_url));
         html.push_str("</head>\n");
         html.push_str("<body>\n");
         html.push_str("  <header>\n");
@@ -57,7 +57,7 @@ impl SiteGenerator {
         html.push_str("  </header>\n");
         html.push_str("  <nav aria-label=\"Breadcrumb\">\n");
         html.push_str("    <ol>\n");
-        html.push_str("      <li><a href=\"/bible/\">Home</a></li>\n");
+        html.push_str(&format!("      <li><a href=\"{}\">Home</a></li>\n", base_url));
         html.push_str("    </ol>\n");
         html.push_str("  </nav>\n");
         html.push_str("  <main>\n");
@@ -68,8 +68,8 @@ impl SiteGenerator {
         for (version_code, chapter_count) in version_list {
             let version_name = version_code.to_uppercase();
             html.push_str(&format!(
-                "        <li><a href=\"/bible/{}/\">{}</a> ({} chapters)</li>\n",
-                version_code, version_name, chapter_count
+                "        <li><a href=\"{}{}/\">{}</a> ({} chapters)</li>\n",
+                base_url, version_code, version_name, chapter_count
             ));
         }
 
@@ -95,7 +95,7 @@ impl SiteGenerator {
         for book in sorted_books {
             let version_code = book_owner.get(&book).cloned().unwrap_or_default();
             if !version_code.is_empty() {
-                let book_url = format!("/bible/{}/{}/1.html", version_code, book);
+                let book_url = format!("{}{}/{}/1.html", base_url, version_code, book);
                 html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
             }
         }
@@ -104,7 +104,7 @@ impl SiteGenerator {
         html.push_str("    </section>\n");
         html.push_str("  </main>\n");
         html.push_str("  <footer>\n");
-        html.push_str("    <p><a href=\"/manifest.json\">Manifest</a></p>\n");
+        html.push_str(&format!("    <p><a href=\"{}manifest.json\">Manifest</a></p>\n", base_url));
         html.push_str("  </footer>\n");
         html.push_str("</body>\n");
         html.push_str("</html>\n");
@@ -165,7 +165,7 @@ impl SiteGenerator {
         version_list.sort();
 
         for version_code in version_list {
-            let version_url = format!("{}/bible/{}", base_url, version_code);
+            let version_url = format!("{}{}/", base_url, version_code);
             xml.push_str("  <url>\n");
             xml.push_str(&format!("    <loc>{}</loc>\n", version_url));
             xml.push_str("    <changefreq>weekly</changefreq>\n");
@@ -181,7 +181,7 @@ impl SiteGenerator {
                 if parts.len() >= 2 {
                     let book = parts[0];
                     let chapter = parts[1];
-                    let chapter_url = format!("{}/bible/{}/{}/{}.html", base_url, version_code, book, chapter);
+                    let chapter_url = format!("{}{}/{}/{}.html", base_url, version_code, book, chapter);
                     xml.push_str("  <url>\n");
                     xml.push_str(&format!("    <loc>{}</loc>\n", chapter_url));
                     xml.push_str("    <changefreq>monthly</changefreq>\n");
@@ -204,7 +204,7 @@ impl SiteGenerator {
     pub fn generate_robots_txt(&self) -> Result<PathBuf> {
         let output_path = self.output_base.join("robots.txt");
 
-        let content = "User-agent: *\nAllow: /\n\nSitemap: /sitemap.xml\n";
+        let content = "User-agent: *\nAllow: /\n\nSitemap: /bible/sitemap.xml\n";
 
         fs::write(&output_path, content)
             .context("Failed to write robots.txt")?;
@@ -214,5 +214,3 @@ impl SiteGenerator {
         Ok(output_path)
     }
 }
-
-

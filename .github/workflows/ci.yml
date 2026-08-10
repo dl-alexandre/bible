@@ -36,18 +36,13 @@ jobs:
             ${{ runner.os }}-cargo-
       
       - name: Run tests
-        run: cargo test --release --workspace || true
-        continue-on-error: true
+        run: cargo test --release --workspace
       
       - name: Build
         run: cargo build --release
       
-      - name: Validate schemas
-        run: |
-          cargo run --release -- --validate-only || true
-          if [ -f schema/manifest-1.0.json ]; then
-            echo "Schemas validated"
-          fi
+      - name: Check schemas are present
+        run: test -f schema/manifest-1.0.json
 
   build-and-deploy:
     name: Build and Deploy
@@ -90,6 +85,9 @@ jobs:
           if [ -f "static/og-image.png" ]; then cp static/og-image.png out/static/; echo "✓ Copied og-image.png"; fi
           if [ -f "static/favicon.ico" ]; then cp static/favicon.ico out/static/; echo "✓ Copied favicon.ico"; fi
           if [ -f "static/styles.css" ]; then cp static/styles.css out/static/; echo "✓ Copied styles.css"; fi
+          if [ -f "static/app.webmanifest" ]; then cp static/app.webmanifest out/static/; echo "✓ Copied app.webmanifest"; fi
+          if [ -f "static/verses.js" ]; then cp static/verses.js out/static/; echo "✓ Copied verses.js"; fi
+          if [ -f "static/sw.js" ]; then cp static/sw.js out/sw.js; echo "✓ Copied service worker"; fi
           echo "Building site..."
           cargo run --release -- \
             --datasets datasets/kjv.txt \
@@ -106,8 +104,11 @@ jobs:
             echo "Build failed!"
             exit 1
           }
-          echo "Removing JSON directories..."
-          rm -rf out/kjv out/asv out/web out/bsb || true
+          echo "Merging JSON API files into the Pages artifact..."
+          for version in kjv asv web bsb; do
+            cp -R "out/$version/." "out/bible/$version/"
+            rm -rf "out/$version"
+          done
           echo "Moving files to correct structure for GitHub Pages..."
           if [ -f out/index.html ]; then
             mv out/index.html out/bible/index.html || true
@@ -123,6 +124,9 @@ jobs:
           fi
           if [ -d out/static ]; then
             mv out/static out/bible/static || true
+          fi
+          if [ -f out/sw.js ]; then
+            mv out/sw.js out/bible/sw.js
           fi
           echo "Build complete! Files in out/bible/:"
           ls -la out/bible/ | head -20
@@ -202,6 +206,10 @@ jobs:
             echo "ERROR: WEB index.html is missing!"
             MISSING=1
           fi
+          if [ ! -f "out/bible/bsb/index.html" ]; then
+            echo "ERROR: BSB index.html is missing!"
+            MISSING=1
+          fi
           if [ $MISSING -eq 1 ]; then
             echo "FATAL: Required index files are missing. Build will fail."
             exit 1
@@ -229,4 +237,3 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-

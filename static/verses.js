@@ -141,4 +141,97 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    const compareButton = document.querySelector('#compare-button');
+    const comparisonPanel = document.querySelector('#comparison-panel');
+    const comparisonStatus = document.querySelector('.comparison-status');
+    const comparisonTable = document.querySelector('.comparison-table');
+    const comparisonOptions = document.querySelector('.comparison-options');
+    const page = document.documentElement;
+
+    async function loadComparison() {
+        const baseUrl = page.dataset.baseUrl;
+        const book = page.dataset.book;
+        const chapter = page.dataset.chapter;
+        const versions = Array.from(comparisonOptions.querySelectorAll('input:checked'))
+            .map(input => input.value);
+
+        if (!versions.length) {
+            comparisonStatus.textContent = 'Select at least one translation.';
+            comparisonTable.querySelector('thead').replaceChildren();
+            comparisonTable.querySelector('tbody').replaceChildren();
+            return;
+        }
+
+        comparisonStatus.textContent = 'Loading translations...';
+
+        try {
+            const responses = await Promise.all(versions.map(async version => {
+                const url = `${baseUrl}${version}/${encodeURIComponent(book)}/${chapter}.json`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`${version}: ${response.status}`);
+                return [version, await response.json()];
+            }));
+
+            const labels = Object.fromEntries(
+                Array.from(comparisonOptions.querySelectorAll('label')).map(label => {
+                    const input = label.querySelector('input');
+                    return [input.value, label.textContent.trim()];
+                })
+            );
+            const verseNumbers = new Set();
+            responses.forEach(([, data]) => Object.keys(data.verses || {}).forEach(number => verseNumbers.add(number)));
+
+            const headRow = document.createElement('tr');
+            const verseHeader = document.createElement('th');
+            verseHeader.scope = 'col';
+            verseHeader.textContent = 'Verse';
+            headRow.appendChild(verseHeader);
+            versions.forEach(version => {
+                const header = document.createElement('th');
+                header.scope = 'col';
+                header.textContent = labels[version] || version.toUpperCase();
+                headRow.appendChild(header);
+            });
+
+            const body = document.createElement('tbody');
+            Array.from(verseNumbers).sort((a, b) => Number(a) - Number(b)).forEach(number => {
+                const row = document.createElement('tr');
+                const numberCell = document.createElement('th');
+                numberCell.scope = 'row';
+                numberCell.textContent = number;
+                row.appendChild(numberCell);
+                responses.forEach(([, data]) => {
+                    const cell = document.createElement('td');
+                    cell.textContent = data.verses?.[number] || 'Verse unavailable';
+                    row.appendChild(cell);
+                });
+                body.appendChild(row);
+            });
+
+            comparisonTable.querySelector('thead').replaceChildren(headRow);
+            comparisonTable.querySelector('tbody').replaceWith(body);
+            comparisonStatus.textContent = `${versions.length} translation${versions.length === 1 ? '' : 's'} loaded.`;
+        } catch (error) {
+            comparisonStatus.textContent = 'Comparison could not be loaded. Try again when online.';
+            console.error('Failed to load comparison:', error);
+        }
+    }
+
+    if (compareButton && comparisonPanel && comparisonOptions) {
+        compareButton.addEventListener('click', () => {
+            const opening = comparisonPanel.hidden;
+            comparisonPanel.hidden = !opening;
+            compareButton.setAttribute('aria-expanded', String(opening));
+            compareButton.textContent = opening ? 'Hide comparison' : 'Show comparison';
+            if (opening) loadComparison();
+        });
+        comparisonOptions.addEventListener('change', loadComparison);
+    }
+
+    if ('serviceWorker' in navigator && page.dataset.baseUrl) {
+        navigator.serviceWorker.register(`${page.dataset.baseUrl}sw.js`, {
+            scope: page.dataset.baseUrl
+        }).catch(error => console.warn('Offline support unavailable:', error));
+    }
 });

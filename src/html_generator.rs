@@ -13,6 +13,10 @@ pub struct HtmlGenerator {
 }
 
 impl HtmlGenerator {
+    fn site_url(&self, path: &str) -> String {
+        format!("{}{}", self.base_url.trim_end_matches('/'), path)
+    }
+
     pub fn new(template_dir: &Path, output_dir: &Path, logger: DiagnosticLogger, base_url: &str) -> Result<Self> {
         let mut tera = Tera::new(
             template_dir
@@ -57,7 +61,7 @@ impl HtmlGenerator {
         context.insert("version_code", version_code);
         context.insert("version_name", version_name);
         context.insert("last_updated", &chapter.metadata.last_updated.as_deref().unwrap_or("Unknown"));
-        context.insert("manifest_tag", r#"<link rel="manifest" href="/manifest.json">"#);
+        context.insert("manifest_tag", &self.site_url("/static/app.webmanifest"));
         context.insert("base_url", &self.base_url);
         context.insert("available_versions", available_versions);
 
@@ -123,10 +127,10 @@ impl HtmlGenerator {
             book, chapter, verse
         ));
 
-        let target_url = format!(
-            "/bible/{}/{}/{}.html#v{}",
+        let target_url = self.site_url(&format!(
+            "/{}/{}/{}.html#v{}",
             version_code, book, chapter, verse
-        );
+        ));
 
         let mut context = TeraContext::new();
         context.insert("book", book);
@@ -197,12 +201,12 @@ impl HtmlGenerator {
         html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         html.push_str(&format!("  <title>{} - Bible Versions</title>\n", version_name));
         html.push_str(&format!("  <meta name=\"description\" content=\"Browse all books in the {} translation of the Bible.\">\n", version_name));
-        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"/static/styles.css\">\n"));
+        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}\">\n", self.site_url("/static/styles.css")));
         html.push_str("</head>\n");
         html.push_str("<body>\n");
         html.push_str("  <nav aria-label=\"Breadcrumb navigation\">\n");
         html.push_str("    <ol class=\"breadcrumb\">\n");
-        html.push_str("      <li><a href=\"/bible/\">Home</a></li>\n");
+        html.push_str(&format!("      <li><a href=\"{}\">Home</a></li>\n", self.site_url("/")));
         html.push_str(&format!("      <li aria-current=\"page\">{}</li>\n", version_name));
         html.push_str("    </ol>\n");
         html.push_str("  </nav>\n");
@@ -215,7 +219,7 @@ impl HtmlGenerator {
         html.push_str("      <ul>\n");
 
         for book in books {
-            let book_url = format!("/bible/{}/{}/", version_code, book);
+            let book_url = self.site_url(&format!("/{}/{}/", version_code, book));
             html.push_str(&format!("        <li><a href=\"{}\">{}</a></li>\n", book_url, book));
         }
 
@@ -257,13 +261,13 @@ impl HtmlGenerator {
         html.push_str("  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n");
         html.push_str(&format!("  <title>{} - {} - Bible</title>\n", book, version_name));
         html.push_str(&format!("  <meta name=\"description\" content=\"Browse all chapters in {} ({}) translation.\">\n", book, version_name));
-        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"/static/styles.css\">\n"));
+        html.push_str(&format!("  <link rel=\"stylesheet\" href=\"{}\">\n", self.site_url("/static/styles.css")));
         html.push_str("</head>\n");
         html.push_str("<body>\n");
         html.push_str("  <nav aria-label=\"Breadcrumb navigation\">\n");
         html.push_str("    <ol class=\"breadcrumb\">\n");
-        html.push_str("      <li><a href=\"/bible/\">Home</a></li>\n");
-        html.push_str(&format!("      <li><a href=\"/bible/{}/\">{}</a></li>\n", version_code, version_name));
+        html.push_str(&format!("      <li><a href=\"{}\">Home</a></li>\n", self.site_url("/")));
+        html.push_str(&format!("      <li><a href=\"{}\">{}</a></li>\n", self.site_url(&format!("/{}/", version_code)), version_name));
         html.push_str(&format!("      <li aria-current=\"page\">{}</li>\n", book));
         html.push_str("    </ol>\n");
         html.push_str("  </nav>\n");
@@ -277,7 +281,7 @@ impl HtmlGenerator {
         html.push_str("      <ul>\n");
 
         for chapter in chapters {
-            let chapter_url = format!("/bible/{}/{}/{}.html", version_code, book, chapter);
+            let chapter_url = self.site_url(&format!("/{}/{}/{}.html", version_code, book, chapter));
             html.push_str(&format!("        <li><a href=\"{}\">Chapter {}</a></li>\n", chapter_url, chapter));
         }
 
@@ -444,7 +448,7 @@ mod tests {
         
         let html = std::fs::read_to_string(&redirect_path).unwrap();
         assert!(html.contains("http-equiv=\"refresh\""));
-        if !html.contains("/bible/kjv/Genesis/1.html#v1") {
+        if !html.contains("https://example.com/kjv/Genesis/1.html#v1") {
             panic!("HTML content: {}", html);
         }
     }
@@ -531,4 +535,3 @@ mod tests {
         }
     }
 }
-

@@ -35,6 +35,16 @@ else
     echo "⚠️  Warning: static/styles.css not found"
 fi
 
+if [ -f "static/app.webmanifest" ]; then
+    cp static/app.webmanifest "$OUT_DIR/static/" && echo "✅ Copied app.webmanifest"
+fi
+if [ -f "static/verses.js" ]; then
+    cp static/verses.js "$OUT_DIR/static/" && echo "✅ Copied verses.js"
+fi
+if [ -f "static/sw.js" ]; then
+    cp static/sw.js "$OUT_DIR/sw.js" && echo "✅ Copied service worker"
+fi
+
 echo ""
 echo "Generating site..."
 
@@ -52,12 +62,20 @@ echo "Generating site..."
   --threshold-lev 0.15
 
 echo ""
-echo "Removing JSON chapter files (HTML-only mode)..."
-rm -rf "$OUT_DIR/kjv" "$OUT_DIR/asv" "$OUT_DIR/web" "$OUT_DIR/bsb"
+echo "Merging JSON API files into the site output..."
+for version in kjv asv web bsb; do
+    cp -R "$OUT_DIR/$version/." "$OUT_DIR/bible/$version/"
+    rm -rf "$OUT_DIR/$version"
+done
+if [ -f "$OUT_DIR/sw.js" ]; then
+    mv "$OUT_DIR/sw.js" "$OUT_DIR/bible/sw.js"
+fi
+if [ -d "$OUT_DIR/static" ]; then
+    mv "$OUT_DIR/static" "$OUT_DIR/bible/static"
+fi
 
 echo ""
 echo "Build complete! Site ready in $OUT_DIR/"
 echo "HTML files: $(find "$OUT_DIR/bible" -name '*.html' | wc -l | tr -d ' ')"
 echo ""
-echo "⚠️  Remember to create og-image.png (1200x630px) at $OUT_DIR/static/og-image.png"
-echo "   for proper social media link previews!"
+echo "Static site ready for deployment."

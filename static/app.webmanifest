@@ -1,0 +1,17 @@
+{
+  "name": "Bible Static Site",
+  "short_name": "Bible",
+  "start_url": "/bible/",
+  "scope": "/bible/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2c3e50",
+  "description": "Read and compare public-domain Bible translations.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
