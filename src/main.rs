@@ -215,6 +215,12 @@ fn main() -> Result<()> {
     site_generator
         .generate_robots_txt()
         .context("Failed to generate robots.txt")?;
+    site_generator
+        .generate_search_index(&all_versions, &cli.base_url)
+        .context("Failed to generate search index")?;
+    site_generator
+        .generate_provenance(&source_files, &cli.base_url)
+        .context("Failed to generate provenance page")?;
 
     let stats = crate::logger::ProcessingStats {
         books: all_versions.values().flat_map(|chapters| chapters.keys()).collect::<std::collections::HashSet<_>>().len(),

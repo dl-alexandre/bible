@@ -3,6 +3,7 @@ const SHELL = [
   '/bible/',
   '/bible/static/styles.css',
   '/bible/static/verses.js',
+  '/bible/static/search.js',
   '/bible/static/app.webmanifest'
 ];
 

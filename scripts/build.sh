@@ -41,6 +41,9 @@ fi
 if [ -f "static/verses.js" ]; then
     cp static/verses.js "$OUT_DIR/static/" && echo "✅ Copied verses.js"
 fi
+if [ -f "static/search.js" ]; then
+    cp static/search.js "$OUT_DIR/static/" && echo "✅ Copied search.js"
+fi
 if [ -f "static/sw.js" ]; then
     cp static/sw.js "$OUT_DIR/sw.js" && echo "✅ Copied service worker"
 fi
@@ -67,8 +70,26 @@ for version in kjv asv web bsb; do
     cp -R "$OUT_DIR/$version/." "$OUT_DIR/bible/$version/"
     rm -rf "$OUT_DIR/$version"
 done
+if [ -f "$OUT_DIR/index.html" ]; then
+    mv "$OUT_DIR/index.html" "$OUT_DIR/bible/index.html"
+fi
+if [ -f "$OUT_DIR/manifest.json" ]; then
+    mv "$OUT_DIR/manifest.json" "$OUT_DIR/bible/manifest.json"
+fi
+if [ -f "$OUT_DIR/sitemap.xml" ]; then
+    mv "$OUT_DIR/sitemap.xml" "$OUT_DIR/bible/sitemap.xml"
+fi
+if [ -f "$OUT_DIR/robots.txt" ]; then
+    mv "$OUT_DIR/robots.txt" "$OUT_DIR/bible/robots.txt"
+fi
 if [ -f "$OUT_DIR/sw.js" ]; then
     mv "$OUT_DIR/sw.js" "$OUT_DIR/bible/sw.js"
+fi
+if [ -f "$OUT_DIR/search-index.json" ]; then
+    mv "$OUT_DIR/search-index.json" "$OUT_DIR/bible/search-index.json"
+fi
+if [ -f "$OUT_DIR/provenance.html" ]; then
+    mv "$OUT_DIR/provenance.html" "$OUT_DIR/bible/provenance.html"
 fi
 if [ -d "$OUT_DIR/static" ]; then
     mv "$OUT_DIR/static" "$OUT_DIR/bible/static"

@@ -229,6 +229,75 @@ document.addEventListener('DOMContentLoaded', function () {
         comparisonOptions.addEventListener('change', loadComparison);
     }
 
+    const storageKey = `bible:${page.dataset.version}:${page.dataset.book}:${page.dataset.chapter}`;
+    let selectedVerse = window.location.hash || '#v1';
+    const noteInput = document.querySelector('#verse-note');
+    const offlineStatus = document.querySelector('#offline-status');
+    const installButton = document.querySelector('#install-button');
+    function loadNote() {
+        if (noteInput) noteInput.value = localStorage.getItem(`${storageKey}:note:${selectedVerse}`) || '';
+    }
+
+    document.querySelectorAll('.verse').forEach(verse => {
+        verse.addEventListener('click', () => {
+            selectedVerse = `#${verse.id}`;
+            loadNote();
+        });
+    });
+    loadNote();
+
+    document.querySelector('#save-note')?.addEventListener('click', () => {
+        if (!noteInput) return;
+        localStorage.setItem(`${storageKey}:note:${selectedVerse}`, noteInput.value);
+        showToast('Note saved on this device');
+    });
+    document.querySelector('#bookmark-button')?.addEventListener('click', () => {
+        const bookmarks = JSON.parse(localStorage.getItem('bible:bookmarks') || '[]');
+        const bookmark = { url: `${window.location.pathname}${selectedVerse}`, label: `${page.dataset.book} ${page.dataset.chapter}${selectedVerse}` };
+        if (!bookmarks.some(item => item.url === bookmark.url)) bookmarks.push(bookmark);
+        localStorage.setItem('bible:bookmarks', JSON.stringify(bookmarks.slice(-100)));
+        renderBookmarks();
+        showToast('Bookmark saved on this device');
+    });
+    function renderBookmarks() {
+        const list = document.querySelector('#bookmark-list');
+        if (!list) return;
+        list.replaceChildren();
+        JSON.parse(localStorage.getItem('bible:bookmarks') || '[]').slice(-10).reverse().forEach(bookmark => {
+            const item = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = bookmark.url;
+            link.textContent = bookmark.label;
+            item.appendChild(link);
+            list.appendChild(item);
+        });
+    }
+    renderBookmarks();
+    document.querySelector('#font-decrease')?.addEventListener('click', () => {
+        document.documentElement.style.setProperty('--reading-scale', String(Math.max(0.85, Number(getComputedStyle(document.documentElement).getPropertyValue('--reading-scale') || 1) - 0.05)));
+    });
+    document.querySelector('#font-increase')?.addEventListener('click', () => {
+        document.documentElement.style.setProperty('--reading-scale', String(Math.min(1.3, Number(getComputedStyle(document.documentElement).getPropertyValue('--reading-scale') || 1) + 0.05)));
+    });
+    const updateOnlineStatus = () => { if (offlineStatus) offlineStatus.textContent = navigator.onLine ? 'Online' : 'Offline mode'; };
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    let deferredInstall;
+    window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredInstall = event;
+        if (installButton) installButton.hidden = false;
+    });
+    installButton?.addEventListener('click', async () => {
+        if (!deferredInstall) return;
+        deferredInstall.prompt();
+        await deferredInstall.userChoice;
+        deferredInstall = null;
+        installButton.hidden = true;
+    });
+
     if ('serviceWorker' in navigator && page.dataset.baseUrl) {
         navigator.serviceWorker.register(`${page.dataset.baseUrl}sw.js`, {
             scope: page.dataset.baseUrl

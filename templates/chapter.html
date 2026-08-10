@@ -31,6 +31,7 @@
 </head>
 
 <body>
+    <a class="skip-link" href="#main-content">Skip to chapter text</a>
     <nav aria-label="Breadcrumb navigation">
         <ol class="breadcrumb">
             <li><a href="{{ base_url }}">Home</a></li>
@@ -85,6 +86,23 @@
         </ul>
     </nav>
 
+    <section class="reading-tools" aria-labelledby="reading-tools-title">
+        <h2 id="reading-tools-title">Reading tools</h2>
+        <div class="reading-tool-actions">
+            <button type="button" id="font-decrease">A-</button>
+            <button type="button" id="font-increase">A+</button>
+            <button type="button" id="bookmark-button">Bookmark verse</button>
+            <span id="offline-status" role="status">Online</span>
+            <button type="button" id="install-button" hidden>Install app</button>
+        </div>
+        <ul id="bookmark-list" class="bookmark-list" aria-label="Saved bookmarks"></ul>
+        <label for="verse-note">Note for selected verse</label>
+        <div class="note-row">
+            <textarea id="verse-note" rows="2" placeholder="Select a verse, then write a note..."></textarea>
+            <button type="button" id="save-note">Save note</button>
+        </div>
+    </section>
+
     {% if available_versions and available_versions | length > 1 %}
     <section class="comparison-toolbar" aria-labelledby="comparison-title">
         <div>
@@ -111,7 +129,7 @@
     </section>
     {% endif %}
 
-    <main>
+    <main id="main-content">
         <article class="chapter-content">
             <div class="verses">
                 {% for verse in verses %}

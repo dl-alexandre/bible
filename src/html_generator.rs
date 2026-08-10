@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tera::{Tera, Context as TeraContext};
+use regex::Regex;
 
 pub struct HtmlGenerator {
     tera: Tera,
@@ -88,10 +89,14 @@ impl HtmlGenerator {
 
         context.insert("next_chapter", &next_chapter);
 
-        let html = self
+        let rendered = self
             .tera
             .render("chapter.html", &context)
             .context("Failed to render chapter template")?;
+        let html = Regex::new(r">\s+<")
+            .expect("valid HTML whitespace pattern")
+            .replace_all(&rendered, "><")
+            .into_owned();
 
         fs::write(&output_path, html)
             .context("Failed to write HTML file")?;
